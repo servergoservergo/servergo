@@ -1,6 +1,7 @@
 # 编译输出
 /servergo
 /bin/
+**/bin/
 *.exe
 *.exe~
 *.dll
@@ -41,4 +42,29 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 Icon?
-ehthumbs.db 
+ehthumbs.db
+
+# Go模块缓存
+/servergo-website/pkg/mod/
+/servergo-website/pkg/sumdb/
+/servergo-website/pkg/cache/
+
+# Node模块
+/servergo-website/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 构建输出
+/servergo-website/build/
+/servergo-website/dist/
+
+# 编辑器特定文件
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# 其他不需要版本控制的文件
+/Formula/ 
