@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -49,11 +50,11 @@ var configListCmd = &cobra.Command{
 		}
 
 		// 显示配置信息
-		fmt.Println("当前配置:")
-		fmt.Println("====================")
-		fmt.Printf("配置文件路径: %s\n", cfgPath)
-		fmt.Println("---")
-		fmt.Printf("auto-open = %t\n", cfg.AutoOpen)
+		logger.Info("当前配置:")
+		logger.Info("====================")
+		logger.Info("配置文件路径: %s", cfgPath)
+		logger.Info("---")
+		logger.Info("auto-open = %t", cfg.AutoOpen)
 		// 其他配置项...
 
 		return nil
@@ -86,7 +87,7 @@ var configGetCmd = &cobra.Command{
 		}
 
 		// 打印配置值
-		fmt.Printf("%v\n", value)
+		logger.Info("%v", value)
 		return nil
 	},
 }
@@ -121,7 +122,7 @@ var configSetCmd = &cobra.Command{
 			return fmt.Errorf("无法保存配置: %v", err)
 		}
 
-		fmt.Printf("配置项 '%s' 已设置为 '%s'\n", key, value)
+		logger.Info("配置项 '%s' 已设置为 '%s'", key, value)
 		return nil
 	},
 }
