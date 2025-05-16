@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/CC11001100/servergo/pkg/server"
 	"github.com/CC11001100/servergo/pkg/utils"
 	"github.com/spf13/cobra"
@@ -35,16 +36,6 @@ var startCmd = &cobra.Command{
 		// 读取配置中的默认值
 		cfg := config.GetConfig()
 
-		// 如果命令行未指定端口，使用配置中的默认端口
-		if !cmd.Flags().Changed("port") {
-			port = cfg.DefaultPort
-		}
-
-		// 如果命令行未指定目录，使用配置中的默认目录
-		if !cmd.Flags().Changed("dir") && cfg.DefaultDir != "" {
-			dir = cfg.DefaultDir
-		}
-
 		// 如果命令行未指定是否自动打开浏览器，使用配置中的设置
 		if !cmd.Flags().Changed("open") {
 			autoOpen = cfg.AutoOpen
@@ -60,13 +51,12 @@ var startCmd = &cobra.Command{
 
 		// 如果使用的不是用户指定的端口，提示用户
 		if port > 0 && port != actualPort {
-			fmt.Printf("警告: 指定的端口 %d 已被占用，使用可用端口 %d 代替\n", port, actualPort)
+			logger.Warning("指定的端口 %d 已被占用，使用可用端口 %d 代替", port, actualPort)
 		} else if port == 0 {
-			fmt.Printf("未指定端口，自动使用可用端口 %d\n", actualPort)
+			logger.Info("未指定端口，自动使用可用端口 %d", actualPort)
 		}
 
 		// 创建服务器配置
-		// dir可以是绝对路径或相对路径，server.New()会自动转换为绝对路径
 		serverConfig := server.Config{
 			Port: actualPort,
 			Dir:  dir,
@@ -101,12 +91,14 @@ func openBrowser(url string) {
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
-		fmt.Printf("不支持的操作系统，无法自动打开浏览器，请手动访问: %s\n", url)
+		logger.Warning("不支持的操作系统，无法自动打开浏览器，请手动访问: %s", url)
 		return
 	}
 
 	if err != nil {
-		fmt.Printf("无法打开浏览器: %v\n请手动访问: %s\n", err, url)
+		logger.Error("无法打开浏览器: %v\n请手动访问: %s", err, url)
+	} else {
+		logger.Info("已在浏览器中打开 %s", url)
 	}
 }
 
@@ -115,7 +107,7 @@ func init() {
 
 	// 添加标志到start命令
 	// 端口默认值为0，表示自动探测可用端口
-	startCmd.Flags().IntVarP(&port, "port", "p", 0, "服务器要监听的端口（默认使用配置中设置的端口或自动探测，指定端口被占用时也会自动探测）")
-	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", "要提供服务的目录路径（可以是绝对路径或相对路径，默认使用配置中设置的目录或当前目录）")
+	startCmd.Flags().IntVarP(&port, "port", "p", 0, "服务器要监听的端口（默认自动探测，指定端口被占用时也会自动探测）")
+	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", "要提供服务的目录路径（可以是绝对路径或相对路径，默认当前目录）")
 	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, "启动服务器后是否自动打开浏览器（默认使用配置中的设置）")
 }

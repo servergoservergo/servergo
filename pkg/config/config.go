@@ -19,12 +19,8 @@ const (
 
 // Config 结构表示应用程序的配置
 type Config struct {
-	// 默认端口，0表示自动探测
-	DefaultPort int `mapstructure:"default_port"`
-	// 默认目录
-	DefaultDir string `mapstructure:"default_dir"`
 	// 启动后是否自动打开浏览器
-	AutoOpen bool `mapstructure:"auto_open"`
+	AutoOpen bool `mapstructure:"auto-open"`
 	// 其他配置项可以在这里添加
 }
 
@@ -85,9 +81,7 @@ func GetConfig() Config {
 // SaveConfig 保存配置到文件
 func SaveConfig(cfg Config) error {
 	// 将配置设置到viper
-	viper.Set("default_port", cfg.DefaultPort)
-	viper.Set("default_dir", cfg.DefaultDir)
-	viper.Set("auto_open", cfg.AutoOpen)
+	viper.Set("auto-open", cfg.AutoOpen)
 	// 其他配置项设置...
 
 	// 保存配置到文件
@@ -96,7 +90,5 @@ func SaveConfig(cfg Config) error {
 
 // 设置默认配置
 func SetDefaults() {
-	viper.SetDefault("default_port", 0) // 0表示自动探测
-	viper.SetDefault("default_dir", ".")
-	viper.SetDefault("auto_open", true) // 默认自动打开浏览器
+	viper.SetDefault("auto-open", true) // 默认自动打开浏览器
 }

@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +29,10 @@ func init() {
 
 	// 设置默认值
 	config.SetDefaults()
+
+	// 初始化日志系统
+	// 可以根据需要设置日志级别
+	logger.Default.SetLevel(logger.INFO)
 }
 
 // Execute 添加所有子命令到根命令并执行
@@ -44,7 +48,7 @@ func Execute() {
 	})
 
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		logger.Error("执行命令时发生错误: %v", err)
 		os.Exit(1)
 	}
 }

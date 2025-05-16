@@ -11,9 +11,7 @@ import (
 
 // 支持的配置键列表
 var validConfigKeys = []string{
-	"default_port", // 默认端口
-	"default_dir",  // 默认目录
-	"auto_open",    // 是否自动打开浏览器
+	"auto-open", // 是否自动打开浏览器
 	// 在这里添加其他支持的配置键
 }
 
@@ -22,8 +20,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "管理ServerGo配置",
 	Long: `管理ServerGo的持久化配置。
-可以设置默认端口、默认目录等配置，这些配置将保存在用户主目录下的.servergo目录中。
-设置的配置将在未指定相应选项时使用。
+可以设置如是否自动打开浏览器等配置，这些配置将保存在用户主目录下的.servergo目录中。
 
 支持以下子命令:
   list - 列出所有配置
@@ -56,9 +53,7 @@ var configListCmd = &cobra.Command{
 		fmt.Println("====================")
 		fmt.Printf("配置文件路径: %s\n", cfgPath)
 		fmt.Println("---")
-		fmt.Printf("default_port = %d\n", cfg.DefaultPort)
-		fmt.Printf("default_dir = %s\n", cfg.DefaultDir)
-		fmt.Printf("auto_open = %t\n", cfg.AutoOpen)
+		fmt.Printf("auto-open = %t\n", cfg.AutoOpen)
 		// 其他配置项...
 
 		return nil
@@ -150,9 +145,7 @@ func generateInvalidKeyError(key string) error {
 
 	// 添加配置项说明
 	errorMsg += "\n配置项说明:\n"
-	errorMsg += "  - default_port: 默认端口，0表示自动探测\n"
-	errorMsg += "  - default_dir: 默认目录路径\n"
-	errorMsg += "  - auto_open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
+	errorMsg += "  - auto-open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
 	// 添加其他配置项的说明...
 
 	return fmt.Errorf(errorMsg)
@@ -176,19 +169,7 @@ func parseBoolValue(value string) (bool, error) {
 // 设置配置值（根据类型转换）
 func setConfigValue(key, value string) error {
 	switch key {
-	case "default_port":
-		// 尝试将值转换为整数
-		var portValue int
-		if _, err := fmt.Sscanf(value, "%d", &portValue); err != nil {
-			return fmt.Errorf("端口必须是一个整数: %v", err)
-		}
-		viper.Set(key, portValue)
-
-	case "default_dir":
-		// 目录值直接设置为字符串
-		viper.Set(key, value)
-
-	case "auto_open":
+	case "auto-open":
 		// 将输入转换为布尔值
 		boolValue, err := parseBoolValue(value)
 		if err != nil {
