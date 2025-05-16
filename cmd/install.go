@@ -6,12 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// 命令行标志
-var (
-	// 是否卸载（如果为true，则执行卸载操作）
-	uninstall bool
-)
-
 // installCmd 表示安装命令
 var installCmd = &cobra.Command{
 	Use:   "install",
@@ -23,11 +17,8 @@ var installCmd = &cobra.Command{
 在macOS和Linux上，默认安装到/usr/local/bin目录（可能需要sudo权限）。
 在Windows上，默认安装到用户主目录下的.servergo\bin目录，并将该目录添加到PATH环境变量。
 
-可以使用--uninstall参数卸载servergo。`,
+如需卸载，请使用 'servergo uninstall' 命令。`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if uninstall {
-			return doUninstall()
-		}
 		return doInstall()
 	},
 }
@@ -42,19 +33,6 @@ func doInstall() error {
 	return nil
 }
 
-// doUninstall 执行卸载操作
-func doUninstall() error {
-	logger.Info("开始从系统PATH中卸载servergo...")
-	if err := installer.UninstallFromPath(); err != nil {
-		logger.Error("卸载失败: %v", err)
-		return err
-	}
-	return nil
-}
-
 func init() {
 	RootCmd.AddCommand(installCmd)
-
-	// 添加标志
-	installCmd.Flags().BoolVarP(&uninstall, "uninstall", "u", false, "卸载servergo（从PATH中移除）")
 }
