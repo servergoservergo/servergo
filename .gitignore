@@ -1,0 +1,44 @@
+# 编译输出
+/servergo
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试二进制文件
+*.test
+*.out
+*.prof
+
+# Go相关
+.idea/
+.vscode/
+*.iml
+.DS_Store
+vendor/
+go.work
+/go.work.sum
+
+# 依赖目录
+/dist/
+/tmp/
+/coverage.txt
+
+# 日志文件
+*.log
+
+# 本地配置文件
+.env
+.env.local
+.envrc
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db 
