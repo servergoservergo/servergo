@@ -36,8 +36,26 @@ func (m *MacInstaller) Install(executablePath string) error {
 	targetPath := filepath.Join(m.targetDir, "servergo")
 
 	// 检查是否已经安装
+	existingInstall := false
 	if _, err := os.Stat(targetPath); err == nil {
-		logger.Warning("servergo 已经安装在 %s，将覆盖现有安装", targetPath)
+		existingInstall = true
+	}
+
+	// 如果已安装，先检测是符号链接还是实际文件
+	if existingInstall {
+		fileInfo, err := os.Lstat(targetPath)
+		if err == nil && fileInfo.Mode()&os.ModeSymlink != 0 {
+			// 是符号链接，读取链接指向
+			if linkTarget, err := os.Readlink(targetPath); err == nil {
+				logger.Info("检测到现有安装，符号链接指向: %s", linkTarget)
+				if linkTarget == executablePath {
+					logger.Info("重新安装相同位置的程序，无需更新符号链接")
+					return nil
+				}
+			}
+		}
+
+		logger.Warning("servergo 已经安装在 %s，将更新为新版本", targetPath)
 		if err := os.Remove(targetPath); err != nil {
 			return fmt.Errorf("无法删除现有安装: %v", err)
 		}
@@ -60,7 +78,11 @@ func (m *MacInstaller) Install(executablePath string) error {
 		}
 	}
 
-	logger.Info("servergo 已成功安装到 %s", targetPath)
+	if existingInstall {
+		logger.Info("servergo 已成功更新到 %s", targetPath)
+	} else {
+		logger.Info("servergo 已成功安装到 %s", targetPath)
+	}
 	logger.Info("现在您可以在任何目录下使用 'servergo' 命令")
 
 	return nil

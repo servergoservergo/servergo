@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/CC11001100/servergo/pkg/logger"
 )
@@ -47,21 +48,58 @@ func (w *WindowsInstaller) Install(executablePath string) error {
 	targetPath := filepath.Join(w.targetDir, "servergo.exe")
 
 	// 检查是否已经安装
+	existingInstall := false
+	backupNeeded := false
 	if _, err := os.Stat(targetPath); err == nil {
-		logger.Warning("servergo 已经安装在 %s，将覆盖现有安装", targetPath)
+		existingInstall = true
+
+		// 检查是否与当前文件相同
+		if isSameFile(executablePath, targetPath) {
+			logger.Info("检测到安装的文件与当前文件相同，跳过复制")
+			backupNeeded = false
+		} else {
+			logger.Warning("servergo 已经安装在 %s，将更新为新版本", targetPath)
+			backupNeeded = true
+		}
+	}
+
+	// 如果需要备份之前的版本
+	if backupNeeded {
+		// 创建备份目录
+		backupDir := filepath.Join(w.targetDir, "backup", time.Now().Format("20060102-150405"))
+		if err := os.MkdirAll(backupDir, 0755); err == nil {
+			backupPath := filepath.Join(backupDir, "servergo.exe")
+			logger.Info("备份现有安装到 %s", backupPath)
+
+			// 复制文件到备份目录
+			if input, err := os.ReadFile(targetPath); err == nil {
+				if err = os.WriteFile(backupPath, input, 0755); err != nil {
+					logger.Warning("备份失败: %v", err)
+				}
+			} else {
+				logger.Warning("无法读取现有安装进行备份: %v", err)
+			}
+		} else {
+			logger.Warning("无法创建备份目录: %v", err)
+		}
+
+		// 删除现有安装
 		if err := os.Remove(targetPath); err != nil {
 			return fmt.Errorf("无法删除现有安装: %v", err)
 		}
 	}
 
-	// 复制可执行文件
-	logger.Info("复制可执行文件: %s -> %s", executablePath, targetPath)
-	input, err := os.ReadFile(executablePath)
-	if err != nil {
-		return fmt.Errorf("无法读取源文件: %v", err)
-	}
-	if err = os.WriteFile(targetPath, input, 0755); err != nil {
-		return fmt.Errorf("无法写入目标文件: %v", err)
+	// 如果是新安装或者需要更新
+	if !existingInstall || backupNeeded {
+		// 复制可执行文件
+		logger.Info("复制可执行文件: %s -> %s", executablePath, targetPath)
+		input, err := os.ReadFile(executablePath)
+		if err != nil {
+			return fmt.Errorf("无法读取源文件: %v", err)
+		}
+		if err = os.WriteFile(targetPath, input, 0755); err != nil {
+			return fmt.Errorf("无法写入目标文件: %v", err)
+		}
 	}
 
 	// 将目标目录添加到用户PATH环境变量
@@ -69,10 +107,43 @@ func (w *WindowsInstaller) Install(executablePath string) error {
 		return err
 	}
 
-	logger.Info("servergo 已成功安装到 %s", targetPath)
+	if existingInstall && backupNeeded {
+		logger.Info("servergo 已成功更新到 %s", targetPath)
+	} else if existingInstall {
+		logger.Info("servergo 已经是最新版本")
+	} else {
+		logger.Info("servergo 已成功安装到 %s", targetPath)
+	}
 	logger.Info("请重新打开命令提示符或PowerShell窗口，然后尝试使用 'servergo' 命令")
 
 	return nil
+}
+
+// isSameFile 检查两个文件是否相同
+func isSameFile(file1, file2 string) bool {
+	// 检查文件大小
+	stat1, err1 := os.Stat(file1)
+	stat2, err2 := os.Stat(file2)
+
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	// 如果文件大小不同，则肯定不是同一个文件
+	if stat1.Size() != stat2.Size() {
+		return false
+	}
+
+	// 读取两个文件内容进行比较
+	content1, err1 := os.ReadFile(file1)
+	content2, err2 := os.ReadFile(file2)
+
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	// 内容完全相同则认为是同一个文件
+	return string(content1) == string(content2)
 }
 
 // Uninstall 在Windows系统中从PATH移除程序
