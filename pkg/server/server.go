@@ -122,7 +122,7 @@ func (fs *FileServer) Start() error {
 	case auth.FormAuth:
 		logger.Info("启用了表单认证 (Form Auth)")
 		if fs.authenticator.LoginPageEnabled() {
-			logger.Info("登录页面已启用，访问 /login 进行登录")
+			logger.Info("登录页面已启用，访问 /auth/login 进行登录")
 		}
 	}
 
