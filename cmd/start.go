@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/CC11001100/servergo/pkg/auth"
 	"github.com/CC11001100/servergo/pkg/config"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/CC11001100/servergo/pkg/server"
@@ -16,6 +17,13 @@ import (
 var (
 	// 是否自动打开浏览器（命令行标志）
 	autoOpen bool
+
+	// 认证相关标志
+	authType        string // 认证类型：none, basic, token, form
+	username        string // 用户名
+	password        string // 密码
+	token           string // 令牌
+	enableLoginPage bool   // 是否启用登录页面
 )
 
 // 别名列表 - 预留位置供后续扩展
@@ -56,10 +64,37 @@ var startCmd = &cobra.Command{
 			logger.Info("未指定端口，自动使用可用端口 %d", actualPort)
 		}
 
+		// 转换认证类型
+		var authTypeEnum auth.AuthType
+		switch authType {
+		case "basic":
+			authTypeEnum = auth.BasicAuth
+			if username == "" || password == "" {
+				return fmt.Errorf("使用Basic认证时必须同时提供用户名和密码")
+			}
+		case "token":
+			authTypeEnum = auth.TokenAuth
+			if token == "" {
+				return fmt.Errorf("使用Token认证时必须提供令牌")
+			}
+		case "form":
+			authTypeEnum = auth.FormAuth
+			if username == "" || password == "" {
+				return fmt.Errorf("使用Form认证时必须同时提供用户名和密码")
+			}
+		default:
+			authTypeEnum = auth.NoAuth
+		}
+
 		// 创建服务器配置
 		serverConfig := server.Config{
-			Port: actualPort,
-			Dir:  dir,
+			Port:            actualPort,
+			Dir:             dir,
+			AuthType:        authTypeEnum,
+			Username:        username,
+			Password:        password,
+			Token:           token,
+			EnableLoginPage: enableLoginPage,
 		}
 
 		// 创建并启动文件服务器
@@ -110,4 +145,11 @@ func init() {
 	startCmd.Flags().IntVarP(&port, "port", "p", 0, "服务器要监听的端口（默认自动探测，指定端口被占用时也会自动探测）")
 	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", "要提供服务的目录路径（可以是绝对路径或相对路径，默认当前目录）")
 	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, "启动服务器后是否自动打开浏览器（默认使用配置中的设置）")
+
+	// 添加认证相关的标志
+	startCmd.Flags().StringVarP(&authType, "auth", "a", "none", "认证类型：none(不认证), basic(HTTP基本认证), token(令牌认证), form(表单认证)")
+	startCmd.Flags().StringVarP(&username, "username", "u", "", "用于basic或form认证的用户名")
+	startCmd.Flags().StringVarP(&password, "password", "w", "", "用于basic或form认证的密码")
+	startCmd.Flags().StringVarP(&token, "token", "t", "", "用于token认证的令牌")
+	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, "是否启用登录页面（仅适用于form认证）")
 }
