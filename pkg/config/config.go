@@ -21,6 +21,10 @@ const (
 type Config struct {
 	// 启动后是否自动打开浏览器
 	AutoOpen bool `mapstructure:"auto-open"`
+	// 是否启用目录列表功能
+	EnableDirListing bool `mapstructure:"enable-dir-listing"`
+	// 目录列表主题
+	Theme string `mapstructure:"theme"`
 	// 其他配置项可以在这里添加
 }
 
@@ -82,6 +86,8 @@ func GetConfig() Config {
 func SaveConfig(cfg Config) error {
 	// 将配置设置到viper
 	viper.Set("auto-open", cfg.AutoOpen)
+	viper.Set("enable-dir-listing", cfg.EnableDirListing)
+	viper.Set("theme", cfg.Theme)
 	// 其他配置项设置...
 
 	// 保存配置到文件
@@ -90,5 +96,7 @@ func SaveConfig(cfg Config) error {
 
 // 设置默认配置
 func SetDefaults() {
-	viper.SetDefault("auto-open", true) // 默认自动打开浏览器
+	viper.SetDefault("auto-open", true)          // 默认自动打开浏览器
+	viper.SetDefault("enable-dir-listing", true) // 默认启用目录列表功能
+	viper.SetDefault("theme", "default")         // 默认使用默认主题
 }

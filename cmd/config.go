@@ -12,7 +12,8 @@ import (
 
 // 支持的配置键列表
 var validConfigKeys = []string{
-	"auto-open", // 是否自动打开浏览器
+	"auto-open",          // 是否自动打开浏览器
+	"enable-dir-listing", // 是否启用目录列表功能
 	// 在这里添加其他支持的配置键
 }
 
@@ -55,6 +56,7 @@ var configListCmd = &cobra.Command{
 		logger.Info("配置文件路径: %s", cfgPath)
 		logger.Info("---")
 		logger.Info("auto-open = %t", cfg.AutoOpen)
+		logger.Info("enable-dir-listing = %t", cfg.EnableDirListing)
 		// 其他配置项...
 
 		return nil
@@ -147,6 +149,7 @@ func generateInvalidKeyError(key string) error {
 	// 添加配置项说明
 	errorMsg += "\n配置项说明:\n"
 	errorMsg += "  - auto-open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
+	errorMsg += "  - enable-dir-listing: 是否启用目录列表功能，可接受的值: true/false, yes/no, 1/0\n"
 	// 添加其他配置项的说明...
 
 	return fmt.Errorf(errorMsg)
@@ -170,7 +173,7 @@ func parseBoolValue(value string) (bool, error) {
 // 设置配置值（根据类型转换）
 func setConfigValue(key, value string) error {
 	switch key {
-	case "auto-open":
+	case "auto-open", "enable-dir-listing":
 		// 将输入转换为布尔值
 		boolValue, err := parseBoolValue(value)
 		if err != nil {

@@ -1,0 +1,130 @@
+/* 默认主题样式 */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #f7f7f7;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+}
+
+h1 {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-top: 0;
+    color: #444;
+    font-size: 24px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+th {
+    text-align: left;
+    padding: 12px 8px;
+    background-color: #f2f2f2;
+    border-bottom: 2px solid #ddd;
+    color: #555;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #004499;
+}
+
+.dir {
+    font-weight: bold;
+    color: #2c5aa0;
+}
+
+.parent {
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    padding: 10px 0;
+}
+
+.parent a {
+    background-color: #f5f5f5;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
+.footer {
+    margin-top: 30px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+    font-size: 0.85em;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
+}
+
+.name-col {
+    width: 55%;
+}
+
+.size-col {
+    width: 15%;
+}
+
+.date-col {
+    width: 30%;
+}
+
+.time {
+    font-style: italic;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    th, td {
+        padding: 8px 4px;
+    }
+    
+    .date-col {
+        display: none;
+    }
+    
+    .name-col {
+        width: 70%;
+    }
+    
+    .size-col {
+        width: 30%;
+    }
+} 

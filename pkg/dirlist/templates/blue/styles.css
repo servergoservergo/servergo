@@ -1,0 +1,171 @@
+/* 蓝色主题样式 */
+:root {
+    --primary-color: #2c80b9;
+    --secondary-color: #1e5a87;
+    --background-color: #f0f8ff;
+    --content-bg-color: #ffffff;
+    --text-color: #333;
+    --link-color: #2c80b9;
+    --link-hover-color: #1e5a87;
+    --header-color: #2c80b9;
+    --border-color: #cce0f5;
+    --table-header-bg: #e6f3ff;
+    --table-stripe-bg: #f5faff;
+    --table-hover-bg: #e6f3ff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--content-bg-color);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    border-radius: 5px;
+}
+
+.header {
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+h1 {
+    color: var(--header-color);
+    margin-top: 0;
+    font-size: 24px;
+}
+
+.parent {
+    margin: 15px 0;
+}
+
+.parent a {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.parent a:hover {
+    background-color: var(--secondary-color);
+}
+
+.parent-icon {
+    margin-right: 5px;
+}
+
+.file-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th {
+    text-align: left;
+    padding: 12px 10px;
+    background-color: var(--table-header-bg);
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+tr:nth-child(even) {
+    background-color: var(--table-stripe-bg);
+}
+
+tr:hover {
+    background-color: var(--table-hover-bg);
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+.dir {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.icon {
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.name-col {
+    width: 55%;
+}
+
+.size-col {
+    width: 15%;
+}
+
+.date-col {
+    width: 30%;
+}
+
+.footer {
+    margin-top: 30px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+    font-size: 0.9em;
+    color: #777;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.time {
+    font-style: italic;
+    color: var(--secondary-color);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+    }
+    
+    .date-col {
+        display: none;
+    }
+    
+    .name-col {
+        width: 70%;
+    }
+    
+    .size-col {
+        width: 30%;
+    }
+} 

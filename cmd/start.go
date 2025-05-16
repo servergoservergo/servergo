@@ -24,6 +24,10 @@ var (
 	password        string // 密码
 	token           string // 令牌
 	enableLoginPage bool   // 是否启用登录页面
+
+	// 目录浏览相关标志
+	enableDirListing bool   // 是否启用目录列表功能
+	theme            string // 目录列表主题
 )
 
 // 别名列表 - 预留位置供后续扩展
@@ -88,13 +92,15 @@ var startCmd = &cobra.Command{
 
 		// 创建服务器配置
 		serverConfig := server.Config{
-			Port:            actualPort,
-			Dir:             dir,
-			AuthType:        authTypeEnum,
-			Username:        username,
-			Password:        password,
-			Token:           token,
-			EnableLoginPage: enableLoginPage,
+			Port:             actualPort,
+			Dir:              dir,
+			AuthType:         authTypeEnum,
+			Username:         username,
+			Password:         password,
+			Token:            token,
+			EnableLoginPage:  enableLoginPage,
+			EnableDirListing: enableDirListing,
+			Theme:            theme,
 		}
 
 		// 创建并启动文件服务器
@@ -152,4 +158,8 @@ func init() {
 	startCmd.Flags().StringVarP(&password, "password", "w", "", "用于basic或form认证的密码")
 	startCmd.Flags().StringVarP(&token, "token", "t", "", "用于token认证的令牌")
 	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, "是否启用登录页面（仅适用于form认证）")
+
+	// 添加目录浏览相关的标志
+	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", true, "是否启用目录列表功能（默认启用）")
+	startCmd.Flags().StringVarP(&theme, "theme", "m", "", "目录列表主题（默认值: default, 可选: dark）")
 }

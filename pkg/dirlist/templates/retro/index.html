@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>目录列表: {{.DirPath}}</title>
+    <link rel="stylesheet" href="/_servergo_assets/retro/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="screen">
+        <div class="scanline"></div>
+        <div class="container">
+            <header class="header">
+                <div class="title-bar">
+                    <div class="title-text">ServerGo :: 文件目录</div>
+                    <div class="title-controls">
+                        <span class="control"></span>
+                        <span class="control"></span>
+                        <span class="control"></span>
+                    </div>
+                </div>
+                <h1>目录: {{.DirPath}}</h1>
+                {{if .ParentDir}}
+                <div class="parent-link">
+                    <a href="{{.ParentDir}}">[..] 返回上级目录</a>
+                </div>
+                {{end}}
+            </header>
+            
+            <main class="content">
+                <div class="dos-box">
+                    <table class="file-list">
+                        <thead>
+                            <tr>
+                                <th class="name-col">文件名</th>
+                                <th class="size-col">大小</th>
+                                <th class="date-col">修改时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Items}}
+                            <tr>
+                                <td>
+                                    {{if .IsDir}}
+                                    <a href="{{.Path}}/" class="dir">[DIR] {{.Name}}/</a>
+                                    {{else}}
+                                    <a href="{{.Path}}">[FILE] {{.Name}}</a>
+                                    {{end}}
+                                </td>
+                                <td>{{.Size}}</td>
+                                <td>{{.LastModified}}</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+            
+            <footer class="footer">
+                <div class="status-bar">
+                    <span>ServerGo v1.0</span>
+                    <span class="time">{{.CurrentTime}}</span>
+                </div>
+                <div class="command-line">
+                    <span class="prompt">C:\></span>
+                    <span class="cmd">dir {{.DirPath}}</span>
+                    <span class="cursor"></span>
+                </div>
+            </footer>
+        </div>
+    </div>
+</body>
+</html> 

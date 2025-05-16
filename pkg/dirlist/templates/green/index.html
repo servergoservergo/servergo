@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>目录列表: {{.DirPath}}</title>
+    <link rel="stylesheet" href="/_servergo_assets/green/styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <header class="header">
+                <h1>
+                    <span class="title-icon">📂</span>
+                    目录列表: {{.DirPath}}
+                </h1>
+                {{if .ParentDir}}
+                <div class="parent">
+                    <a href="{{.ParentDir}}"><span class="parent-icon">↩</span> 返回上级目录</a>
+                </div>
+                {{end}}
+            </header>
+            
+            <main class="content">
+                <table class="file-list">
+                    <thead>
+                        <tr>
+                            <th class="name-col">文件名</th>
+                            <th class="size-col">大小</th>
+                            <th class="date-col">修改日期</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Items}}
+                        <tr>
+                            <td>
+                                {{if .IsDir}}
+                                <a href="{{.Path}}/" class="dir">
+                                    <span class="folder-icon">📁</span> {{.Name}}/
+                                </a>
+                                {{else}}
+                                <a href="{{.Path}}">
+                                    <span class="file-icon">📄</span> {{.Name}}
+                                </a>
+                                {{end}}
+                            </td>
+                            <td>{{.Size}}</td>
+                            <td>{{.LastModified}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </main>
+            
+            <footer class="footer">
+                <div class="footer-content">
+                    <div class="server-info">由 ServerGo 文件服务器提供</div>
+                    <div class="time-info">当前时间: {{.CurrentTime}}</div>
+                </div>
+            </footer>
+        </div>
+    </div>
+</body>
+</html> 

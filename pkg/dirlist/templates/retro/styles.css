@@ -1,0 +1,240 @@
+/* 复古DOS风格主题 */
+:root {
+    --background-color: #000084;
+    --text-color: #00ff00;
+    --highlight-color: #ffff00;
+    --secondary-color: #00aaaa;
+    --box-color: #000000;
+    --border-color: #00aaaa;
+    --link-color: #ffffff;
+    --visited-color: #aaaaaa;
+    --dir-color: #ffff00;
+}
+
+@keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    color: var(--text-color);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.screen {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+}
+
+.scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 255, 0, 0.3);
+    z-index: 999;
+    animation: scan 8s linear infinite;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.container {
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--background-color);
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 0 10px rgba(0, 170, 170, 0.5);
+}
+
+.header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+}
+
+.title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--secondary-color);
+    color: var(--box-color);
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+.title-text {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+}
+
+.title-controls {
+    display: flex;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--box-color);
+    margin-left: 5px;
+    background-color: var(--text-color);
+}
+
+.header h1 {
+    font-size: 24px;
+    margin: 10px 0;
+    color: var(--highlight-color);
+    text-shadow: 2px 2px var(--box-color);
+    font-family: 'Press Start 2P', cursive;
+}
+
+.parent-link {
+    margin-bottom: 15px;
+}
+
+.parent-link a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.parent-link a:hover {
+    text-decoration: underline;
+}
+
+.content {
+    margin-bottom: 20px;
+}
+
+.dos-box {
+    background-color: var(--box-color);
+    border: 2px solid var(--border-color);
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.file-list {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.file-list th {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--highlight-color);
+}
+
+.file-list td {
+    padding: 5px 8px;
+}
+
+.file-list tr:hover {
+    background-color: rgba(0, 170, 170, 0.2);
+}
+
+.name-col {
+    width: 60%;
+}
+
+.size-col, .date-col {
+    width: 20%;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--visited-color);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a.dir {
+    color: var(--dir-color);
+    font-weight: bold;
+}
+
+.footer {
+    border-top: 2px solid var(--secondary-color);
+    padding-top: 10px;
+}
+
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--secondary-color);
+    color: var(--box-color);
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.command-line {
+    background-color: var(--box-color);
+    color: var(--text-color);
+    padding: 5px 8px;
+    border: 1px solid var(--border-color);
+    font-family: 'VT323', monospace;
+}
+
+.prompt {
+    color: var(--highlight-color);
+    margin-right: 5px;
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background-color: var(--text-color);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1s infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    .title-text {
+        font-size: 12px;
+    }
+    
+    .date-col {
+        display: none;
+    }
+    
+    .name-col {
+        width: 65%;
+    }
+    
+    .size-col {
+        width: 35%;
+    }
+} 

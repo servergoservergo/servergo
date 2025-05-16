@@ -1,0 +1,186 @@
+/* 网站整体样式 */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+/* 主布局样式 */
+.main-layout {
+  min-height: 100vh;
+}
+
+/* 顶部导航栏样式 */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 15px !important;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+/* 主内容区域 */
+.main-content {
+  padding: 24px 50px;
+  margin-top: 64px; /* Ant Design Header 默认高度 */
+}
+
+.logo {
+  float: left;
+  margin-right: 30px;
+}
+
+.logo a {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+/* 首页特殊样式 */
+.home-hero {
+  padding: 40px 0;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.home-hero h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.hero-buttons {
+  margin-top: 30px;
+}
+
+.hero-buttons .ant-btn {
+  margin: 0 10px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.feature-section {
+  margin: 50px 0;
+  text-align: center;
+}
+
+.feature-section h2 {
+  font-size: 2em;
+  margin-bottom: 40px;
+}
+
+.feature-card {
+  height: 100%;
+  transition: all 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card .anticon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #1890ff;
+}
+
+/* 文档页面样式 */
+.documentation-container {
+  text-align: left;
+}
+
+.documentation-container pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+}
+
+.documentation-container code {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+}
+
+/* 主题样式展示区 */
+.theme-showcase {
+  margin: 30px 0;
+}
+
+.theme-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.theme-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-preview {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.theme-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.theme-card:hover .theme-overlay {
+  opacity: 1;
+}
+
+/* 响应式样式调整 */
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 2em;
+  }
+  
+  .hero-buttons .ant-btn {
+    margin: 5px;
+  }
+
+  .header {
+    padding: 0 10px !important;
+    flex-direction: column;
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .logo {
+    margin-right: 0;
+    margin-bottom: 10px;
+    float: none;
+  }
+  
+  .main-content {
+    padding: 15px;
+    margin-top: 110px; /* 为折叠后的导航栏腾出更多空间 */
+  }
+}

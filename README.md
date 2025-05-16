@@ -21,9 +21,24 @@ servergo/
 
 ## 安装
 
+### 使用go install安装
+
 ```bash
 go install github.com/CC11001100/servergo@latest
 ```
+
+### 使用Homebrew安装（macOS）
+
+```bash
+# 添加tap并安装
+brew tap CC11001100/servergo https://github.com/CC11001100/servergo
+brew install servergo
+
+# 或者一步完成
+brew install CC11001100/servergo/servergo
+```
+
+更多关于Homebrew安装的详细信息，请参考[HOMEBREW.md](HOMEBREW.md)文件。
 
 ## 使用方法
 
