@@ -70,6 +70,9 @@ func Init(lang string) error {
 	// 保存当前语言
 	currentLanguage = lang
 
+	// 标记为已加载
+	loaded = true
+
 	return nil
 }
 
@@ -112,6 +115,12 @@ func SetLanguage(lang string) error {
 
 	// 重新创建本地化器
 	localizer = i18n.NewLocalizer(bundle, lang)
+
+	// 更新当前语言
+	currentLanguage = lang
+
+	// 标记为已加载
+	loaded = true
 
 	return nil
 }
