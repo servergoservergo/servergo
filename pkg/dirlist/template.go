@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"io/fs"
 	"strings"
+
+	"github.com/CC11001100/servergo/pkg/i18n"
 )
 
 // 使用嵌入文件系统导入模板文件
@@ -103,7 +105,7 @@ func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 		if theme != DefaultTheme {
 			return NewDirListTemplate(DefaultTheme)
 		}
-		return nil, fmt.Errorf("无法加载主题模板: %v", err)
+		return nil, fmt.Errorf(i18n.Tf("dirlist.theme_load_error", err))
 	}
 
 	return &DirListTemplate{
@@ -135,12 +137,12 @@ func (t *DirListTemplate) Render(data TemplateData) (string, error) {
 	// 对于HTML主题，使用常规模板渲染
 	// 如果模板对象为nil，返回错误
 	if t.template == nil {
-		return "", fmt.Errorf("模板未初始化或主题 '%s' 不支持常规HTML渲染", t.theme)
+		return "", fmt.Errorf(i18n.Tf("dirlist.template_not_initialized", t.theme))
 	}
 
 	result := &strings.Builder{}
 	if err := t.template.Execute(result, data); err != nil {
-		return "", fmt.Errorf("渲染模板失败: %v", err)
+		return "", fmt.Errorf(i18n.Tf("dirlist.template_render_error", err))
 	}
 
 	return result.String(), nil
@@ -195,7 +197,7 @@ func (t *DirListTemplate) renderJSON(data TemplateData) (string, error) {
 	// 序列化为JSON字符串
 	jsonBytes, err := json.MarshalIndent(jsonResult, "", "    ")
 	if err != nil {
-		return "", fmt.Errorf("JSON序列化失败: %v", err)
+		return "", fmt.Errorf(i18n.Tf("dirlist.json_marshal_error", err))
 	}
 
 	return string(jsonBytes), nil

@@ -111,6 +111,34 @@
 "config.disabled" = "Disabled"
 "config.item_set" = "Configuration item '%s' has been set to '%s'"
 
+# Format related
+"format.size_byte" = "B"
+"format.size_kb" = "KB"
+"format.size_mb" = "MB"
+"format.size_gb" = "GB"
+"format.size_tb" = "TB"
+
+# Directory listing
+"dirlist.theme_load_error" = "Failed to load theme template: %v"
+"dirlist.template_not_initialized" = "Template not initialized or theme '%s' does not support standard HTML rendering"
+"dirlist.template_render_error" = "Template rendering failed: %v"
+"dirlist.json_marshal_error" = "JSON serialization failed: %v"
+"dirlist.header_name" = "Name"
+"dirlist.header_type" = "Type"
+"dirlist.header_size" = "Size"
+"dirlist.header_modified" = "Last Modified"
+"dirlist.type_directory" = "Directory"
+"dirlist.type_file" = "File"
+"dirlist.type_image" = "Image"
+"dirlist.type_video" = "Video"
+"dirlist.type_audio" = "Audio"
+"dirlist.type_archive" = "Archive"
+"dirlist.type_code" = "Code"
+"dirlist.footer_current_path" = "Current Path"
+"dirlist.footer_time" = "Time"
+"dirlist.footer_total" = "Total"
+"dirlist.footer_dir_time" = "Directory Time"
+
 # Server related
 "server.starting" = "Starting file server at http://localhost:%d"
 "server.serving_dir" = "Serving directory: %s"

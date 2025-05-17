@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -22,17 +23,17 @@ func renderTableTheme(data TemplateData) (string, error) {
 
 	// 设置表头
 	t.AppendHeader(table.Row{
-		"名称",
-		"类型",
-		"大小",
-		"修改时间",
+		i18n.T("dirlist.header_name"),
+		i18n.T("dirlist.header_type"),
+		i18n.T("dirlist.header_size"),
+		i18n.T("dirlist.header_modified"),
 	})
 
 	// 如果有上级目录，添加一行用于返回上级目录
 	if data.ParentDir != "" {
 		t.AppendRow(table.Row{
 			text.Colors{text.FgBlue, text.Bold}.Sprint(".."),
-			text.Colors{text.FgBlue, text.Bold}.Sprint("目录"),
+			text.Colors{text.FgBlue, text.Bold}.Sprint(i18n.T("dirlist.type_directory")),
 			"-",
 			"-",
 		})
@@ -45,28 +46,28 @@ func renderTableTheme(data TemplateData) (string, error) {
 		if item.IsDir {
 			// 目录用蓝色加粗显示
 			nameColored = text.Colors{text.FgBlue, text.Bold}.Sprint(item.Name + "/")
-			typeColored = text.Colors{text.FgBlue}.Sprint("目录")
+			typeColored = text.Colors{text.FgBlue}.Sprint(i18n.T("dirlist.type_directory"))
 		} else {
 			// 根据扩展名设置不同颜色
 			switch getFileType(item.Name) {
 			case "image":
 				nameColored = text.Colors{text.FgMagenta}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgMagenta}.Sprint("图片")
+				typeColored = text.Colors{text.FgMagenta}.Sprint(i18n.T("dirlist.type_image"))
 			case "video":
 				nameColored = text.Colors{text.FgCyan}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgCyan}.Sprint("视频")
+				typeColored = text.Colors{text.FgCyan}.Sprint(i18n.T("dirlist.type_video"))
 			case "audio":
 				nameColored = text.Colors{text.FgYellow}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgYellow}.Sprint("音频")
+				typeColored = text.Colors{text.FgYellow}.Sprint(i18n.T("dirlist.type_audio"))
 			case "archive":
 				nameColored = text.Colors{text.FgRed}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgRed}.Sprint("压缩")
+				typeColored = text.Colors{text.FgRed}.Sprint(i18n.T("dirlist.type_archive"))
 			case "code":
 				nameColored = text.Colors{text.FgGreen}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgGreen}.Sprint("代码")
+				typeColored = text.Colors{text.FgGreen}.Sprint(i18n.T("dirlist.type_code"))
 			default:
 				nameColored = item.Name
-				typeColored = "文件"
+				typeColored = i18n.T("dirlist.type_file")
 			}
 		}
 
@@ -87,7 +88,7 @@ func renderTableTheme(data TemplateData) (string, error) {
 	})
 
 	// 添加表脚显示当前路径和时间
-	t.AppendFooter(table.Row{"当前路径", data.DirPath, "时间", data.CurrentTime})
+	t.AppendFooter(table.Row{i18n.T("dirlist.footer_current_path"), data.DirPath, i18n.T("dirlist.footer_time"), data.CurrentTime})
 
 	// 渲染表格
 	t.Render()
@@ -143,17 +144,17 @@ func TableDirList(dirPath string, items []FileItem) {
 
 	// 设置表头
 	t.AppendHeader(table.Row{
-		"名称",
-		"类型",
-		"大小",
-		"修改时间",
+		i18n.T("dirlist.header_name"),
+		i18n.T("dirlist.header_type"),
+		i18n.T("dirlist.header_size"),
+		i18n.T("dirlist.header_modified"),
 	})
 
 	// 如果不是根目录，添加返回上级目录行
 	if dirPath != "/" {
 		t.AppendRow(table.Row{
 			text.Colors{text.FgBlue, text.Bold}.Sprint(".."),
-			text.Colors{text.FgBlue, text.Bold}.Sprint("目录"),
+			text.Colors{text.FgBlue, text.Bold}.Sprint(i18n.T("dirlist.type_directory")),
 			"-",
 			"-",
 		})
@@ -166,28 +167,28 @@ func TableDirList(dirPath string, items []FileItem) {
 		if item.IsDir {
 			// 目录用蓝色加粗显示
 			nameColored = text.Colors{text.FgBlue, text.Bold}.Sprint(item.Name + "/")
-			typeColored = text.Colors{text.FgBlue}.Sprint("目录")
+			typeColored = text.Colors{text.FgBlue}.Sprint(i18n.T("dirlist.type_directory"))
 		} else {
 			// 根据扩展名设置不同颜色
 			switch getFileType(item.Name) {
 			case "image":
 				nameColored = text.Colors{text.FgMagenta}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgMagenta}.Sprint("图片")
+				typeColored = text.Colors{text.FgMagenta}.Sprint(i18n.T("dirlist.type_image"))
 			case "video":
 				nameColored = text.Colors{text.FgCyan}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgCyan}.Sprint("视频")
+				typeColored = text.Colors{text.FgCyan}.Sprint(i18n.T("dirlist.type_video"))
 			case "audio":
 				nameColored = text.Colors{text.FgYellow}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgYellow}.Sprint("音频")
+				typeColored = text.Colors{text.FgYellow}.Sprint(i18n.T("dirlist.type_audio"))
 			case "archive":
 				nameColored = text.Colors{text.FgRed}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgRed}.Sprint("压缩")
+				typeColored = text.Colors{text.FgRed}.Sprint(i18n.T("dirlist.type_archive"))
 			case "code":
 				nameColored = text.Colors{text.FgGreen}.Sprint(item.Name)
-				typeColored = text.Colors{text.FgGreen}.Sprint("代码")
+				typeColored = text.Colors{text.FgGreen}.Sprint(i18n.T("dirlist.type_code"))
 			default:
 				nameColored = item.Name
-				typeColored = "文件"
+				typeColored = i18n.T("dirlist.type_file")
 			}
 		}
 
@@ -209,7 +210,7 @@ func TableDirList(dirPath string, items []FileItem) {
 
 	// 添加表脚
 	t.AppendFooter(table.Row{
-		"总计",
+		i18n.T("dirlist.footer_total"),
 		len(items) + func() int {
 			if dirPath != "/" && len(items) > 0 {
 				return 1
@@ -217,7 +218,7 @@ func TableDirList(dirPath string, items []FileItem) {
 				return 0
 			}
 		}(), // 包含可能的 ".." 条目
-		"目录时间",
+		i18n.T("dirlist.footer_dir_time"),
 		time.Now().Format("2006-01-02 15:04:05"),
 	})
 

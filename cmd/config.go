@@ -46,6 +46,11 @@ var configListCmd = &cobra.Command{
 		// 获取当前配置
 		cfg := config.GetConfig()
 
+		// 确保使用当前语言
+		if err := i18n.Init(cfg.Language); err != nil {
+			logger.Warning(fmt.Sprintf("Failed to initialize i18n: %v", err))
+		}
+
 		// 获取配置文件路径
 		cfgPath, err := config.GetConfigFilePath()
 		if err != nil {
@@ -75,10 +80,10 @@ var configListCmd = &cobra.Command{
 		// 设置表格样式
 		t.SetStyle(table.StyleColoredBright)
 
-		// 设置表头
+		// 设置表头 - 确保使用当前语言的翻译
 		UpdateConfigTableHeaders(t)
 
-		// 添加配置信息行
+		// 添加配置信息行 - 确保使用当前语言的翻译
 		t.AppendRows([]table.Row{
 			{"auto-open", formatBoolValue(cfg.AutoOpen), i18n.T("config.auto_open_desc")},
 			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), i18n.T("config.enable_dir_listing_desc")},
@@ -234,7 +239,7 @@ var configSetCmd = &cobra.Command{
 				logger.Warning(i18n.Tf("config.language_init_error", err))
 			}
 
-			// 重新初始化命令描述
+			// 语言改变后，更新所有命令描述
 			UpdateCommandDescriptions()
 
 			// 语言改变后，也需要重新加载表格表头的翻译
@@ -361,7 +366,13 @@ func formatLanguageValue(lang string) string {
 // UpdateConfigTableHeaders 更新配置表格的表头为当前语言
 func UpdateConfigTableHeaders(t table.Writer) {
 	t.ResetHeaders()
-	t.AppendHeader(table.Row{i18n.T("config.item"), i18n.T("config.current_value"), i18n.T("config.description")})
+
+	// 强制重新获取当前语言的翻译
+	itemHeader := i18n.T("config.item")
+	valueHeader := i18n.T("config.current_value")
+	descHeader := i18n.T("config.description")
+
+	t.AppendHeader(table.Row{itemHeader, valueHeader, descHeader})
 }
 
 func init() {
