@@ -35,6 +35,7 @@
 "version.version" = "Version: %s"
 "version.build_date" = "Build Date: %s"
 "version.git_commit" = "Git Commit: %s"
+"version.git_ref" = "Git Branch: %s"
 "version.unknown_date" = "Unknown"
 "version.unknown_commit" = "Unknown"
 "version.description_1" = "ServerGo is a fast HTTP file server tool"

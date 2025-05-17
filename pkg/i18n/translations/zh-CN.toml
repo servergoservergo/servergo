@@ -35,6 +35,7 @@
 "version.version" = "版本: %s"
 "version.build_date" = "构建日期: %s"
 "version.git_commit" = "Git提交哈希: %s"
+"version.git_ref" = "Git分支: %s"
 "version.unknown_date" = "未知"
 "version.unknown_commit" = "未知"
 "version.description_1" = "ServerGo 是一个快速的HTTP文件服务器工具"
