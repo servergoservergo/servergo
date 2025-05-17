@@ -4,12 +4,10 @@ import (
 	"embed"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/BurntSushi/toml"
-	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 )
@@ -20,8 +18,6 @@ const (
 	LangEN = "en"
 	// LangZH 简体中文
 	LangZH = "zh-CN"
-	// LangDefault 默认语言
-	LangDefault = LangEN
 	// DefaultLanguage 默认语言
 	DefaultLanguage = LangEN
 )
@@ -167,36 +163,13 @@ func DetectOSLanguage() string {
 	}
 
 	// 找不到有效语言设置时返回默认语言
-	return LangDefault
+	return DefaultLanguage
 }
 
 // loadTranslations 加载翻译文件
 func loadTranslations() error {
-	// 先尝试加载嵌入式翻译
-	loadEmbeddedTranslations()
-
-	// 再尝试从外部文件加载翻译
-	// 尝试加载英文翻译
-	enFile := filepath.Join("translations", "en.toml")
-	if _, err := os.Stat(enFile); err == nil {
-		_, loadErr := bundle.LoadMessageFile(enFile)
-		if loadErr != nil {
-			// 只有在出错时才记录日志
-			logger.Info("Failed to load English translation file: %v", loadErr)
-		}
-	}
-
-	// 尝试加载中文翻译
-	zhFile := filepath.Join("translations", "zh-CN.toml")
-	if _, err := os.Stat(zhFile); err == nil {
-		_, loadErr := bundle.LoadMessageFile(zhFile)
-		if loadErr != nil {
-			// 只有在出错时才记录日志
-			logger.Info("Failed to load Chinese translation file: %v", loadErr)
-		}
-	}
-
-	return nil
+	// 只加载嵌入式翻译
+	return loadEmbeddedTranslations()
 }
 
 // loadEmbeddedTranslations 从嵌入式文件系统加载翻译
@@ -249,21 +222,14 @@ func T(messageID string) string {
 	})
 
 	if err != nil {
+		// 找不到翻译时返回原始ID
 		return messageID
 	}
 
 	return translation
 }
 
-// Tf 格式化翻译文本，支持变量替换
+// Tf 是带格式化的翻译函数，类似 fmt.Sprintf(T(messageID), args...)
 func Tf(messageID string, args ...interface{}) string {
-	// 获取基本翻译文本
-	translated := T(messageID)
-
-	// 如果有替换参数，进行格式化
-	if len(args) > 0 {
-		return fmt.Sprintf(translated, args...)
-	}
-
-	return translated
+	return fmt.Sprintf(T(messageID), args...)
 }

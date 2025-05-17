@@ -16,16 +16,7 @@ import (
 //go:embed templates
 var templatesFS embed.FS
 
-// 支持的主题
-const (
-	DefaultTheme = "default"
-	DarkTheme    = "dark"
-	BlueTheme    = "blue"  // 新增蓝色主题
-	GreenTheme   = "green" // 新增绿色主题
-	RetroTheme   = "retro" // 新增复古主题
-	JsonTheme    = "json"  // 新增JSON主题，支持API调用
-	TableTheme   = "table" // 新增彩色表格主题
-)
+// 支持的主题常量在 themes.go 中定义
 
 // DirListTemplate 表示目录列表模板
 type DirListTemplate struct {
@@ -53,21 +44,20 @@ type FileItem struct {
 
 // 返回所有支持的主题列表
 func GetSupportedThemes() []string {
-	return []string{
-		DefaultTheme,
-		DarkTheme,
-		BlueTheme,
-		GreenTheme,
-		RetroTheme,
-		JsonTheme,
-		TableTheme,
-	}
+	return ValidThemes
+}
+
+// 检查模板文件是否存在
+func templateFileExists(path string) bool {
+	// 尝试使用嵌入文件系统检查文件是否存在
+	_, err := templatesFS.ReadFile(path)
+	return err == nil
 }
 
 // NewDirListTemplate 创建新的目录列表模板
 func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 	// 如果没有指定主题或主题无效，使用默认主题
-	if theme == "" || !isThemeValid(theme) {
+	if theme == "" || !IsValidTheme(theme) {
 		theme = DefaultTheme
 	}
 
@@ -82,6 +72,16 @@ func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 	// 加载模板
 	templatePath := fmt.Sprintf("templates/%s/index.html", theme)
 
+	// 首先检查模板文件是否存在
+	if !templateFileExists(templatePath) {
+		errMsg := fmt.Sprintf("主题模板文件不存在: %s", templatePath)
+		if theme != DefaultTheme {
+			fmt.Printf("警告: %s，尝试回退到默认主题\n", errMsg)
+			return NewDirListTemplate(DefaultTheme)
+		}
+		return nil, fmt.Errorf("默认主题模板文件不存在: %s", templatePath)
+	}
+
 	// 创建模板函数映射
 	funcMap := template.FuncMap{
 		"subtract": func(a, b int) int {
@@ -95,33 +95,43 @@ func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 		},
 	}
 
-	// 创建一个新的模板
-	tmpl := template.New("").Funcs(funcMap)
+	// 使用主题名称作为模板名称，这样错误信息会更明确
+	tmplName := fmt.Sprintf("%s_theme", theme)
 
-	// 解析模板文件
-	tmpl, err := tmpl.ParseFS(templatesFS, templatePath)
+	// 创建一个新的模板
+	tmpl := template.New(tmplName).Funcs(funcMap)
+
+	// 读取模板文件内容
+	content, err := templatesFS.ReadFile(templatePath)
 	if err != nil {
-		// 如果指定主题加载失败，尝试回退到默认主题
+		errDetail := fmt.Sprintf("无法读取主题模板文件(%s): %v", templatePath, err)
 		if theme != DefaultTheme {
+			fmt.Printf("警告: %s，尝试回退到默认主题\n", errDetail)
 			return NewDirListTemplate(DefaultTheme)
 		}
-		return nil, fmt.Errorf(i18n.Tf("dirlist.theme_load_error", err))
+		return nil, fmt.Errorf("无法读取默认主题模板文件: %s", err)
+	}
+
+	// 解析模板内容
+	tmpl, err = tmpl.Parse(string(content))
+	if err != nil {
+		errDetail := fmt.Sprintf("无法解析主题模板(%s): %v", templatePath, err)
+		if theme != DefaultTheme {
+			fmt.Printf("警告: %s，尝试回退到默认主题\n", errDetail)
+			return NewDirListTemplate(DefaultTheme)
+		}
+		return nil, fmt.Errorf(i18n.Tf("dirlist.theme_load_error", errDetail))
+	}
+
+	// 额外检查是否真的成功解析了模板
+	if tmpl == nil || tmpl.Templates() == nil || len(tmpl.Templates()) == 0 {
+		return nil, fmt.Errorf("成功解析模板，但模板集合为空 (%s)", templatePath)
 	}
 
 	return &DirListTemplate{
 		theme:    theme,
 		template: tmpl,
 	}, nil
-}
-
-// 检查主题是否有效
-func isThemeValid(theme string) bool {
-	for _, validTheme := range GetSupportedThemes() {
-		if theme == validTheme {
-			return true
-		}
-	}
-	return false
 }
 
 // Render 渲染目录列表模板
@@ -137,12 +147,21 @@ func (t *DirListTemplate) Render(data TemplateData) (string, error) {
 	// 对于HTML主题，使用常规模板渲染
 	// 如果模板对象为nil，返回错误
 	if t.template == nil {
-		return "", fmt.Errorf(i18n.Tf("dirlist.template_not_initialized", t.theme))
+		// 提供更详细的错误信息
+		return "", fmt.Errorf(i18n.Tf("dirlist.template_not_initialized", t.theme) +
+			fmt.Sprintf(" (theme=%s, tmpl=%v)", t.theme, t.template))
+	}
+
+	// 输出模板名称，以便更好地诊断问题
+	templateName := "unnamed"
+	if t.template != nil && t.template.Name() != "" {
+		templateName = t.template.Name()
 	}
 
 	result := &strings.Builder{}
 	if err := t.template.Execute(result, data); err != nil {
-		return "", fmt.Errorf(i18n.Tf("dirlist.template_render_error", err))
+		return "", fmt.Errorf(i18n.Tf("dirlist.template_render_error", err) +
+			fmt.Sprintf(" (theme=%s, template_name=%s)", t.theme, templateName))
 	}
 
 	return result.String(), nil
