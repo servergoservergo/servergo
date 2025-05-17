@@ -7,6 +7,7 @@ import (
 
 	"github.com/CC11001100/servergo/pkg/auth"
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/CC11001100/servergo/pkg/server"
 	"github.com/CC11001100/servergo/pkg/utils"
@@ -42,8 +43,8 @@ var startCmdAliases = []string{
 var startCmd = &cobra.Command{
 	Use:     "start",
 	Aliases: startCmdAliases,
-	Short:   "启动HTTP文件服务器",
-	Long:    `启动一个HTTP文件服务器，为指定目录提供文件访问服务。目录路径可以是绝对路径或相对路径，如果是相对路径，将自动转换为绝对路径。如果不指定端口或指定的端口已被占用，将自动探测一个可用的端口。`,
+	Short:   i18n.T("cmd.start.short"),
+	Long:    i18n.T("cmd.start.long"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 读取配置中的默认值
 		cfg := config.GetConfig()
@@ -58,14 +59,15 @@ var startCmd = &cobra.Command{
 		// 如果port>0，先检查指定端口是否可用，不可用则自动探测
 		actualPort, err := utils.FindAvailablePort(port)
 		if err != nil {
-			return fmt.Errorf("无法找到可用端口: %v", err)
+			return fmt.Errorf(i18n.T("error.no_port_available"))
 		}
 
 		// 如果使用的不是用户指定的端口，提示用户
 		if port > 0 && port != actualPort {
-			logger.Warning("指定的端口 %d 已被占用，使用可用端口 %d 代替", port, actualPort)
+			logger.Warning(i18n.Tf("error.port_unavailable", port))
+			logger.Info(i18n.Tf("server.starting", actualPort))
 		} else if port == 0 {
-			logger.Info("未指定端口，自动使用可用端口 %d", actualPort)
+			logger.Info(i18n.Tf("server.starting", actualPort))
 		}
 
 		// 转换认证类型
@@ -148,9 +150,9 @@ func init() {
 
 	// 添加标志到start命令
 	// 端口默认值为0，表示自动探测可用端口
-	startCmd.Flags().IntVarP(&port, "port", "p", 0, "服务器要监听的端口（默认自动探测，指定端口被占用时也会自动探测）")
-	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", "要提供服务的目录路径（可以是绝对路径或相对路径，默认当前目录）")
-	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, "启动服务器后是否自动打开浏览器（默认使用配置中的设置）")
+	startCmd.Flags().IntVarP(&port, "port", "p", 0, i18n.T("flag.port"))
+	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", i18n.T("flag.dir"))
+	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, i18n.T("flag.auto_open"))
 
 	// 添加认证相关的标志
 	startCmd.Flags().StringVarP(&authType, "auth", "a", "none", "认证类型：none(不认证), basic(HTTP基本认证), token(令牌认证), form(表单认证)")
@@ -160,6 +162,6 @@ func init() {
 	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, "是否启用登录页面（仅适用于form认证）")
 
 	// 添加目录浏览相关的标志
-	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", true, "是否启用目录列表功能（默认启用）")
-	startCmd.Flags().StringVarP(&theme, "theme", "m", "", "目录列表主题（默认值: default, 可选: dark）")
+	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", true, i18n.T("config.enable_dir_listing"))
+	startCmd.Flags().StringVarP(&theme, "theme", "m", "", i18n.T("config.theme"))
 }

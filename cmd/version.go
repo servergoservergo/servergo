@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/spf13/cobra"
 )
@@ -15,27 +16,27 @@ var (
 // versionCmd 显示当前版本信息和项目信息
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "显示ServerGo的版本信息",
-	Long:  `显示ServerGo的详细版本信息、构建信息、作者信息以及问题反馈渠道等。`,
+	Short: i18n.T("cmd.version.short"),
+	Long:  i18n.T("cmd.version.long"),
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Info("ServerGo 版本信息")
+		logger.Info(i18n.T("version.title"))
 		logger.Info("==============")
-		logger.Info("版本: %s", Version)
-		logger.Info("构建日期: %s", BuildDate)
-		logger.Info("Git提交哈希: %s", GitCommit)
+		logger.Info(i18n.Tf("version.version", Version))
+		logger.Info(i18n.Tf("version.build_date", BuildDate))
+		logger.Info(i18n.Tf("version.git_commit", GitCommit))
 		logger.Info("")
-		logger.Info("ServerGo 是一个快速的HTTP文件服务器工具")
-		logger.Info("类似于Python的http.server模块，但提供更好的性能和更多功能")
+		logger.Info(i18n.T("version.description_1"))
+		logger.Info(i18n.T("version.description_2"))
 		logger.Info("")
-		logger.Info("作者信息")
+		logger.Info(i18n.T("version.author_title"))
 		logger.Info("--------")
-		logger.Info("作者: CC11001100")
-		logger.Info("GitHub: https://github.com/CC11001100")
+		logger.Info(i18n.T("version.author_name"))
+		logger.Info(i18n.T("version.author_github"))
 		logger.Info("")
-		logger.Info("反馈问题")
+		logger.Info(i18n.T("version.feedback_title"))
 		logger.Info("--------")
-		logger.Info("如果您发现任何问题或有功能请求，请访问:")
-		logger.Info("https://github.com/CC11001100/servergo/issues")
+		logger.Info(i18n.T("version.feedback_text"))
+		logger.Info(i18n.T("version.feedback_url"))
 	},
 }
 

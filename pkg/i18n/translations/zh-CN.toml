@@ -1,0 +1,85 @@
+# 中文翻译(简体)
+
+# 应用信息
+"app.name" = "ServerGo"
+"app.description" = "一个简单的HTTP文件服务器"
+
+# 命令描述
+"cmd.root.short" = "一个简单的HTTP文件服务器"
+"cmd.root.long" = "ServerGo是一个命令行工具，可以快速启动文件服务器。"
+"cmd.start.short" = "启动文件服务器"
+"cmd.start.long" = "在指定端口和目录上启动HTTP文件服务器。"
+"cmd.config.short" = "管理配置"
+"cmd.config.long" = "查看或修改ServerGo配置。"
+"cmd.config.list.short" = "列出所有配置"
+"cmd.config.list.long" = "列出ServerGo的所有配置项及其当前值。"
+"cmd.config.get.short" = "获取指定配置"
+"cmd.config.get.long" = "获取指定配置项的当前值。"
+"cmd.config.set.short" = "设置指定配置"
+"cmd.config.set.long" = "设置指定配置项的值。"
+"cmd.install.short" = "安装 ServerGo"
+"cmd.install.long" = "将 ServerGo 安装为系统服务并添加到 PATH 中。"
+"cmd.install.start" = "开始安装 ServerGo 到系统 PATH 中..."
+"cmd.install.failed" = "安装失败: %v"
+"cmd.uninstall.short" = "卸载 ServerGo"
+"cmd.uninstall.long" = "从系统 PATH 中卸载 ServerGo。"
+"cmd.uninstall.start" = "开始从系统 PATH 中卸载 ServerGo..."
+"cmd.uninstall.failed" = "卸载失败: %v"
+"cmd.uninstall.complete" = "卸载完成！ServerGo 已从系统 PATH 中移除。"
+"cmd.version.short" = "显示版本信息"
+"cmd.version.long" = "显示ServerGo的版本信息。"
+
+# 版本信息
+"version.title" = "ServerGo 版本信息"
+"version.version" = "版本: %s"
+"version.build_date" = "构建日期: %s"
+"version.git_commit" = "Git提交哈希: %s"
+"version.description_1" = "ServerGo 是一个快速的HTTP文件服务器工具"
+"version.description_2" = "类似于Python的http.server模块，但提供更好的性能和更多功能"
+"version.author_title" = "作者信息"
+"version.author_name" = "作者: CC11001100"
+"version.author_github" = "GitHub: https://github.com/CC11001100"
+"version.feedback_title" = "反馈问题"
+"version.feedback_text" = "如果您发现任何问题或有功能请求，请访问:"
+"version.feedback_url" = "https://github.com/CC11001100/servergo/issues"
+
+# 标志描述
+"flag.port" = "监听端口"
+"flag.dir" = "提供服务的目录"
+"flag.theme" = "目录列表主题"
+"flag.language" = "界面语言"
+"flag.auto_open" = "启动后自动打开浏览器"
+
+# 错误消息
+"error.port_unavailable" = "端口 %d 不可用"
+"error.permission_denied" = "没有权限访问端口 %d"
+"error.no_port_available" = "无法找到可用端口"
+"error.dir_not_exist" = "目录不存在: %s"
+"error.not_a_directory" = "%s 不是一个目录"
+
+# 配置
+"config.auto_open" = "自动打开浏览器"
+"config.enable_dir_listing" = "启用目录浏览"
+"config.theme" = "主题"
+"config.language" = "语言"
+"config.language_changed" = "语言已更改为 %s"
+
+# 服务器相关
+"server.starting" = "启动文件服务器在 http://localhost:%d"
+"server.serving_dir" = "提供目录: %s"
+"server.dir_listing_enabled" = "目录浏览功能已启用 (主题: %s)"
+"server.dir_listing_disabled" = "目录浏览功能已禁用"
+"server.press_ctrl_c" = "按 Ctrl+C 停止服务器"
+
+# 认证
+"auth.disabled" = "未启用认证"
+"auth.basic_enabled" = "启用了基本认证"
+"auth.token_enabled" = "启用了令牌认证"
+"auth.form_enabled" = "启用了表单认证"
+"auth.login_page_enabled" = "登录页面已启用，访问 /auth/login 进行登录"
+
+# HTTP响应
+"http.404" = "404 未找到: %s"
+"http.403" = "403 禁止访问: 目录列表功能已禁用"
+"http.500_dir_content" = "无法读取目录内容: %v"
+"http.500_template" = "模板渲染错误: %v" 

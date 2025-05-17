@@ -317,3 +317,123 @@ func TestPortExhaustion(t *testing.T) {
 		t.Logf("正确处理所有端口不可用的情况: %v", err)
 	}
 }
+
+// TestCheckPort 测试检查指定端口是否可用，并提供详细错误信息
+func TestCheckPort(t *testing.T) {
+	// 测试场景1：有效端口范围内的随机端口
+	randomPort := 40000 + (time.Now().Nanosecond() % 10000)
+	available, err := CheckPort(randomPort, "tcp")
+	if err != nil {
+		t.Logf("检查端口 %d 时出现错误: %v", randomPort, err)
+	} else {
+		t.Logf("端口 %d 可用性: %v", randomPort, available)
+	}
+
+	// 测试场景2：已被占用的端口
+	listener, err := net.Listen("tcp", ":0") // 系统分配一个可用端口
+	if err != nil {
+		t.Fatalf("无法创建监听器: %v", err)
+	}
+	defer listener.Close()
+
+	_, portStr, err := net.SplitHostPort(listener.Addr().String())
+	if err != nil {
+		t.Fatalf("无法解析地址: %v", err)
+	}
+	usedPort, _ := strconv.Atoi(portStr)
+
+	available, err = CheckPort(usedPort, "tcp")
+	if err == nil {
+		t.Errorf("端口 %d 已被占用，但没有返回错误", usedPort)
+	} else {
+		t.Logf("正确检测到端口 %d 已被占用: %v", usedPort, err)
+	}
+
+	// 测试场景3：无效端口（超出范围）
+	available, err = CheckPort(70000, "tcp")
+	if err == nil {
+		t.Errorf("端口 70000 超出有效范围，但没有返回错误")
+	} else {
+		t.Logf("正确检测到无效端口: %v", err)
+	}
+
+	// 测试场景4：无效端口（负数）
+	available, err = CheckPort(-1, "tcp")
+	if err == nil {
+		t.Errorf("端口 -1 是负数，但没有返回错误")
+	} else {
+		t.Logf("正确检测到无效端口: %v", err)
+	}
+
+	// 测试场景5：使用不支持的协议
+	available, err = CheckPort(8080, "icmp") // ICMP不是TCP或UDP
+	if err == nil {
+		t.Errorf("使用了不支持的协议，但没有返回错误")
+	} else {
+		t.Logf("正确检测到不支持的协议: %v", err)
+	}
+}
+
+// TestFindAvailablePortWithProtocol 测试使用指定协议查找可用端口
+func TestFindAvailablePortWithProtocol(t *testing.T) {
+	// 测试场景1：默认协议（不指定）
+	port, err := FindAvailablePortWithProtocol(0, "")
+	if err != nil {
+		t.Errorf("使用默认协议查找端口失败: %v", err)
+	} else {
+		t.Logf("使用默认协议找到可用端口: %d", port)
+	}
+
+	// 测试场景2：指定TCP协议
+	port, err = FindAvailablePortWithProtocol(0, "tcp")
+	if err != nil {
+		t.Errorf("使用TCP协议查找端口失败: %v", err)
+	} else {
+		t.Logf("使用TCP协议找到可用端口: %d", port)
+	}
+
+	// 测试场景3：指定UDP协议
+	port, err = FindAvailablePortWithProtocol(0, "udp")
+	if err != nil {
+		t.Errorf("使用UDP协议查找端口失败: %v", err)
+	} else {
+		t.Logf("使用UDP协议找到可用端口: %d", port)
+	}
+
+	// 测试场景4：指定不支持的协议
+	_, err = FindAvailablePortWithProtocol(0, "icmp")
+	if err == nil {
+		t.Errorf("使用不支持的协议，但没有返回错误")
+	} else {
+		t.Logf("正确检测到不支持的协议: %v", err)
+	}
+
+	// 测试场景5：指定已被占用的首选端口
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatalf("无法创建监听器: %v", err)
+	}
+	defer listener.Close()
+
+	_, portStr, _ := net.SplitHostPort(listener.Addr().String())
+	usedPort, _ := strconv.Atoi(portStr)
+
+	port, err = FindAvailablePortWithProtocol(usedPort, "tcp")
+	if err != nil {
+		t.Errorf("指定已占用端口时查找其他可用端口失败: %v", err)
+	} else if port == usedPort {
+		t.Errorf("返回了已被占用的端口 %d", usedPort)
+	} else {
+		t.Logf("指定已占用端口 %d，找到其他可用端口: %d", usedPort, port)
+	}
+
+	// 测试场景6：特权端口（需要管理员权限）
+	privilegedPort := 80
+	port, err = FindAvailablePortWithProtocol(privilegedPort, "tcp")
+	// 这里不断言结果，因为根据执行环境不同（普通用户/管理员），结果会不同
+	if err != nil {
+		t.Logf("无法使用特权端口 %d: %v", privilegedPort, err)
+	} else {
+		t.Logf("成功找到端口: %d", port)
+	}
+}

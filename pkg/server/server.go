@@ -46,16 +46,16 @@ func New(config Config) (*FileServer, error) {
 	// 获取绝对路径
 	absDir, err := filepath.Abs(config.Dir)
 	if err != nil {
-		return nil, fmt.Errorf("无法获取绝对路径: %v", err)
+		return nil, fmt.Errorf("failed to get absolute path: %v", err)
 	}
 
 	// 检查目录是否存在
 	info, err := os.Stat(absDir)
 	if err != nil {
-		return nil, fmt.Errorf("无法访问目录 %s: %v", absDir, err)
+		return nil, fmt.Errorf("failed to access directory %s: %v", absDir, err)
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("%s 不是一个目录", absDir)
+		return nil, fmt.Errorf("%s is not a directory", absDir)
 	}
 
 	// 设置Gin为生产模式，避免debug信息
@@ -85,7 +85,7 @@ func New(config Config) (*FileServer, error) {
 	// 创建目录列表模板
 	dirTemplate, err := dirlist.NewDirListTemplate(theme)
 	if err != nil {
-		return nil, fmt.Errorf("初始化目录列表模板失败: %v", err)
+		return nil, fmt.Errorf("failed to initialize directory listing template: %v", err)
 	}
 
 	return &FileServer{
@@ -137,33 +137,33 @@ func (fs *FileServer) Start() error {
 
 	// 启动服务器
 	hostAddr := ":" + strconv.Itoa(fs.config.Port)
-	logger.Info("启动文件服务器在 http://localhost:%d", fs.config.Port)
-	logger.Info("提供目录: %s", fs.absDir)
+	logger.Info("Starting file server at http://localhost:%d", fs.config.Port)
+	logger.Info("Serving directory: %s", fs.absDir)
 
 	// 显示功能信息
 	if fs.config.EnableDirListing {
-		logger.Info("目录浏览功能已启用 (主题: %s)", fs.dirTemplate.GetTheme())
+		logger.Info("Directory listing enabled (theme: %s)", fs.dirTemplate.GetTheme())
 	} else {
-		logger.Info("目录浏览功能已禁用")
+		logger.Info("Directory listing disabled")
 	}
 
 	// 显示认证信息
 	switch fs.authenticator.AuthType() {
 	case auth.NoAuth:
-		logger.Info("未启用认证")
+		logger.Info("Authentication disabled")
 	case auth.BasicAuth:
-		logger.Info("启用了基本认证 (Basic Auth)")
+		logger.Info("Basic authentication enabled")
 	case auth.TokenAuth:
-		logger.Info("启用了令牌认证 (Token Auth)")
-		logger.Info("可通过URL查询参数 ?token=%s 或 Authorization header 访问", fs.config.Token)
+		logger.Info("Token authentication enabled")
+		logger.Info("Access with URL parameter ?token=%s or Authorization header", fs.config.Token)
 	case auth.FormAuth:
-		logger.Info("启用了表单认证 (Form Auth)")
+		logger.Info("Form authentication enabled")
 		if fs.authenticator.LoginPageEnabled() {
-			logger.Info("登录页面已启用，访问 /auth/login 进行登录")
+			logger.Info("Login page enabled, visit /auth/login to login")
 		}
 	}
 
-	logger.Info("按 Ctrl+C 停止服务器")
+	logger.Info("Press Ctrl+C to stop the server")
 
 	return fs.engine.Run(hostAddr)
 }
@@ -221,7 +221,7 @@ func (fs *FileServer) handleFileRequest(c *gin.Context) {
 		}
 
 		// 未启用目录列表功能，返回403禁止访问
-		c.String(http.StatusForbidden, "403 Forbidden: 目录列表功能已禁用")
+		c.String(http.StatusForbidden, "403 Forbidden: Directory listing disabled")
 		return
 	}
 
@@ -234,7 +234,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 读取目录内容
 	files, err := os.ReadDir(fullPath)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "无法读取目录内容: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to read directory content: %v", err)
 		return
 	}
 
@@ -310,7 +310,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 渲染模板
 	html, err := fs.dirTemplate.Render(data)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "模板渲染错误: %v", err)
+		c.String(http.StatusInternalServerError, "Template rendering error: %v", err)
 		return
 	}
 

@@ -1,0 +1,85 @@
+# English translations for ServerGo
+
+# App information
+"app.name" = "ServerGo"
+"app.description" = "A simple HTTP file server"
+
+# Command descriptions
+"cmd.root.short" = "A simple HTTP file server"
+"cmd.root.long" = "ServerGo is a command line tool that allows you to quickly start a file server."
+"cmd.start.short" = "Start a file server"
+"cmd.start.long" = "Start a HTTP file server on specified port and directory."
+"cmd.config.short" = "Manage configuration"
+"cmd.config.long" = "View or modify ServerGo configuration."
+"cmd.config.list.short" = "List all configurations"
+"cmd.config.list.long" = "List all ServerGo configuration items and their current values."
+"cmd.config.get.short" = "Get a specific configuration"
+"cmd.config.get.long" = "Get the current value of a specified configuration item."
+"cmd.config.set.short" = "Set a specific configuration"
+"cmd.config.set.long" = "Set the value of a specified configuration item."
+"cmd.install.short" = "Install ServerGo"
+"cmd.install.long" = "Install ServerGo as a system service and make it available in PATH."
+"cmd.install.start" = "Starting to install ServerGo to system PATH..."
+"cmd.install.failed" = "Installation failed: %v"
+"cmd.uninstall.short" = "Uninstall ServerGo"
+"cmd.uninstall.long" = "Uninstall ServerGo from the system PATH."
+"cmd.uninstall.start" = "Starting to uninstall ServerGo from system PATH..."
+"cmd.uninstall.failed" = "Uninstallation failed: %v"
+"cmd.uninstall.complete" = "Uninstallation complete! ServerGo has been removed from system PATH."
+"cmd.version.short" = "Print version information"
+"cmd.version.long" = "Print version information of ServerGo."
+
+# Version information
+"version.title" = "ServerGo Version Information"
+"version.version" = "Version: %s"
+"version.build_date" = "Build Date: %s"
+"version.git_commit" = "Git Commit: %s"
+"version.description_1" = "ServerGo is a fast HTTP file server tool"
+"version.description_2" = "Similar to Python's http.server module, but offers better performance and more features"
+"version.author_title" = "Author Information"
+"version.author_name" = "Author: CC11001100"
+"version.author_github" = "GitHub: https://github.com/CC11001100"
+"version.feedback_title" = "Feedback"
+"version.feedback_text" = "If you find any issues or have feature requests, please visit:"
+"version.feedback_url" = "https://github.com/CC11001100/servergo/issues"
+
+# Flag descriptions
+"flag.port" = "Port to listen on"
+"flag.dir" = "Directory to serve"
+"flag.theme" = "Theme for directory listing"
+"flag.language" = "Interface language"
+"flag.auto_open" = "Automatically open browser after starting"
+
+# Error messages
+"error.port_unavailable" = "Port %d is not available"
+"error.permission_denied" = "Permission denied to access port %d"
+"error.no_port_available" = "Could not find an available port"
+"error.dir_not_exist" = "Directory does not exist: %s"
+"error.not_a_directory" = "%s is not a directory"
+
+# Configuration
+"config.auto_open" = "Auto open browser"
+"config.enable_dir_listing" = "Enable directory listing"
+"config.theme" = "Theme"
+"config.language" = "Language"
+"config.language_changed" = "Language has been changed to %s"
+
+# Server related
+"server.starting" = "Starting file server at http://localhost:%d"
+"server.serving_dir" = "Serving directory: %s"
+"server.dir_listing_enabled" = "Directory listing enabled (theme: %s)"
+"server.dir_listing_disabled" = "Directory listing disabled"
+"server.press_ctrl_c" = "Press Ctrl+C to stop the server"
+
+# Authentication
+"auth.disabled" = "Authentication disabled"
+"auth.basic_enabled" = "Basic authentication enabled"
+"auth.token_enabled" = "Token authentication enabled"
+"auth.form_enabled" = "Form authentication enabled"
+"auth.login_page_enabled" = "Login page enabled, visit /auth/login to login"
+
+# HTTP responses
+"http.404" = "404 Not Found: %s"
+"http.403" = "403 Forbidden: Directory listing disabled"
+"http.500_dir_content" = "Failed to read directory content: %v"
+"http.500_template" = "Template rendering error: %v" 

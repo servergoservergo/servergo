@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -20,27 +21,22 @@ var validConfigKeys = []string{
 	"auto-open",          // 是否自动打开浏览器
 	"enable-dir-listing", // 是否启用目录列表功能
 	"theme",              // 目录列表主题
+	"language",           // 界面语言
 	// 在这里添加其他支持的配置键
 }
 
 // configCmd 表示配置相关的命令
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "管理ServerGo配置",
-	Long: `管理ServerGo的持久化配置。
-可以设置如是否自动打开浏览器等配置，这些配置将保存在用户主目录下的.servergo目录中。
-
-支持以下子命令:
-  list - 列出所有配置
-  get  - 获取指定配置的值
-  set  - 设置指定配置的值`,
+	Short: i18n.T("cmd.config.short"),
+	Long:  i18n.T("cmd.config.long"),
 }
 
 // configListCmd 列出所有配置
 var configListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "列出所有配置",
-	Long:  `列出ServerGo的所有配置项及其当前值。`,
+	Short: i18n.T("cmd.config.list.short"),
+	Long:  i18n.T("cmd.config.list.long"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 初始化配置
 		if err := config.InitConfig(); err != nil {
@@ -87,6 +83,7 @@ var configListCmd = &cobra.Command{
 			{"auto-open", formatBoolValue(cfg.AutoOpen), "启动服务器后是否自动打开浏览器"},
 			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), "是否启用目录列表功能"},
 			{"theme", cfg.Theme, "目录列表主题"},
+			{"language", formatLanguageValue(cfg.Language), "界面语言"},
 		})
 
 		// 设置列对齐方式
@@ -129,12 +126,14 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 		msg.WriteString("  servergo config get auto-open\n")
 		msg.WriteString("  servergo config get theme\n")
 		msg.WriteString("  servergo config get enable-dir-listing\n")
+		msg.WriteString("  servergo config get language\n")
 	} else if cmdName == "set" {
 		msg.WriteString("  servergo config set <配置项> <值>\n\n")
 		msg.WriteString("示例:\n")
 		msg.WriteString("  servergo config set auto-open false       # 关闭自动打开浏览器\n")
 		msg.WriteString("  servergo config set theme dark            # 设置暗色主题\n")
 		msg.WriteString("  servergo config set enable-dir-listing true   # 启用目录列表\n")
+		msg.WriteString("  servergo config set language zh-CN        # 设置为中文界面\n")
 
 		if len(args) == 1 {
 			msg.WriteString("\n您提供的配置项: " + args[0] + "\n")
@@ -142,6 +141,8 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 				msg.WriteString("可选主题: default, dark, blue, green, retro, json, table\n")
 			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" {
 				msg.WriteString("可接受的布尔值: true/false, yes/no, 1/0\n")
+			} else if args[0] == "language" {
+				msg.WriteString("可选语言: en, zh-CN\n")
 			}
 		}
 	}
@@ -152,8 +153,8 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 // configGetCmd 获取指定配置
 var configGetCmd = &cobra.Command{
 	Use:   "get [key]",
-	Short: "获取指定配置",
-	Long:  `获取指定配置项的当前值。`,
+	Short: i18n.T("cmd.config.get.short"),
+	Long:  i18n.T("cmd.config.get.long"),
 	// 不使用标准参数验证，改用自定义验证
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -190,8 +191,8 @@ var configGetCmd = &cobra.Command{
 // configSetCmd 设置指定配置
 var configSetCmd = &cobra.Command{
 	Use:   "set [key] [value]",
-	Short: "设置指定配置",
-	Long:  `设置指定配置项的值。`,
+	Short: i18n.T("cmd.config.set.short"),
+	Long:  i18n.T("cmd.config.set.long"),
 	// 不使用标准参数验证，改用自定义验证
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 2 {
@@ -227,7 +228,18 @@ var configSetCmd = &cobra.Command{
 			return fmt.Errorf("无法保存配置: %v", err)
 		}
 
-		logger.Info("配置项 '%s' 已设置为 '%s'", key, value)
+		// 特殊处理：如果更改的是语言设置，需要重新初始化i18n
+		if key == "language" {
+			if err := i18n.Init(value); err != nil {
+				logger.Warning("语言设置已保存，但初始化国际化支持时出现错误：%v", err)
+			} else {
+				languageDisplayName := i18n.GetLanguageDisplayName(value)
+				logger.Info("界面语言已更改为: %s", languageDisplayName)
+			}
+		} else {
+			logger.Info("配置项 '%s' 已设置为 '%s'", key, value)
+		}
+
 		return nil
 	},
 }
@@ -254,6 +266,7 @@ func generateInvalidKeyError(key string) error {
 	errorMsg += "  - auto-open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
 	errorMsg += "  - enable-dir-listing: 是否启用目录列表功能，可接受的值: true/false, yes/no, 1/0\n"
 	errorMsg += "  - theme: 目录列表主题，可接受的值: default, dark, blue, green, retro, json, table\n"
+	errorMsg += "  - language: 界面语言，可接受的值: en, zh-CN\n"
 	// 添加其他配置项的说明...
 
 	return fmt.Errorf(errorMsg)
@@ -300,6 +313,19 @@ func setConfigValue(key, value string) error {
 		}
 		viper.Set(key, value)
 
+	case "language":
+		// 验证语言是否被支持
+		if !i18n.IsSupportedLanguage(value) {
+			supportedLangs := strings.Join(i18n.GetSupportedLanguages(), ", ")
+			return fmt.Errorf("不支持的语言: %s\n支持的语言有: %s", value, supportedLangs)
+		}
+		viper.Set(key, value)
+
+		// 语言设置特殊处理：同时更新i18n包的语言设置
+		if err := config.SetLanguage(value); err != nil {
+			return fmt.Errorf("无法设置语言: %v", err)
+		}
+
 	default:
 		// 这里不应该到达，因为已经在前面验证了key的有效性
 		return fmt.Errorf("未知的配置项: %s", key)
@@ -314,6 +340,11 @@ func formatBoolValue(value bool) string {
 		return text.Colors{text.FgGreen, text.Bold}.Sprint("开启")
 	}
 	return text.Colors{text.FgRed}.Sprint("关闭")
+}
+
+// 格式化语言值，显示友好的语言名称
+func formatLanguageValue(lang string) string {
+	return i18n.GetLanguageDisplayName(lang)
 }
 
 func init() {
