@@ -1,0 +1,85 @@
+version: 2
+
+project_name: servergo
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/CC11001100/servergo/cmd.Version={{.Version}}
+      - -X github.com/CC11001100/servergo/cmd.BuildDate={{.Date}}
+      - -X github.com/CC11001100/servergo/cmd.GitCommit={{.ShortCommit}}
+    main: .
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+
+# 自动发布到GitHub
+release:
+  github:
+    owner: CC11001100
+    name: servergo
+  prerelease: auto
+  draft: false
+  name_template: "ServerGo v{{.Version}}"
+
+# Homebrew 支持
+brews:
+  - repository:
+      owner: CC11001100
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    name: servergo
+    homepage: "https://github.com/CC11001100/servergo"
+    description: "快速的HTTP文件服务器工具，类似于Python的http.server模块，但提供更好的性能和更多功能"
+    license: "MIT"
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@carlosbecker.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    install: |
+      bin.install "servergo"
+    test: |
+      system "#{bin}/servergo version" 
