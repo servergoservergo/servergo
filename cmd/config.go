@@ -17,6 +17,7 @@ import (
 var validConfigKeys = []string{
 	"auto-open",          // 是否自动打开浏览器
 	"enable-dir-listing", // 是否启用目录列表功能
+	"theme",              // 目录列表主题
 	// 在这里添加其他支持的配置键
 }
 
@@ -125,8 +126,8 @@ var configGetCmd = &cobra.Command{
 			return fmt.Errorf("配置项 '%s' 不存在", key)
 		}
 
-		// 打印配置值
-		logger.Info("%v", value)
+		// 直接输出配置值，不带任何日志前缀
+		fmt.Println(value)
 		return nil
 	},
 }
@@ -190,6 +191,7 @@ func generateInvalidKeyError(key string) error {
 	errorMsg += "\n配置项说明:\n"
 	errorMsg += "  - auto-open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
 	errorMsg += "  - enable-dir-listing: 是否启用目录列表功能，可接受的值: true/false, yes/no, 1/0\n"
+	errorMsg += "  - theme: 目录列表主题，可接受的值: default, dark, blue, green, retro, json, table\n"
 	// 添加其他配置项的说明...
 
 	return fmt.Errorf(errorMsg)
@@ -220,6 +222,21 @@ func setConfigValue(key, value string) error {
 			return err
 		}
 		viper.Set(key, boolValue)
+
+	case "theme":
+		// 验证主题名称是否有效
+		validThemes := []string{"default", "dark", "blue", "green", "retro", "json", "table"}
+		isValid := false
+		for _, theme := range validThemes {
+			if value == theme {
+				isValid = true
+				break
+			}
+		}
+		if !isValid {
+			return fmt.Errorf("无效的主题名称: %s\n支持的主题有: default, dark, blue, green, retro, json, table", value)
+		}
+		viper.Set(key, value)
 
 	default:
 		// 这里不应该到达，因为已经在前面验证了key的有效性
