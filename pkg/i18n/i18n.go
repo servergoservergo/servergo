@@ -81,23 +81,8 @@ func GetCurrentLanguage() string {
 	mutex.RLock()
 	defer mutex.RUnlock()
 
-	if localizer == nil {
-		return LangDefault
-	}
-
-	// 我们没有直接的方法获取 localizer 的当前语言
-	// 所以简单返回当前已经保存的语言值
-	// 创建时保存语言设置
-	currentLanguage := LangDefault
-	for _, lang := range bundle.LanguageTags() {
-		langStr := lang.String()
-		if strings.HasPrefix(langStr, "zh") {
-			currentLanguage = LangZH
-			break
-		} else if strings.HasPrefix(langStr, "en") {
-			currentLanguage = LangEN
-			break
-		}
+	if currentLanguage == "" {
+		return DefaultLanguage
 	}
 
 	return currentLanguage

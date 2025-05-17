@@ -35,6 +35,8 @@
 "version.version" = "Version: %s"
 "version.build_date" = "Build Date: %s"
 "version.git_commit" = "Git Commit: %s"
+"version.unknown_date" = "Unknown"
+"version.unknown_commit" = "Unknown"
 "version.description_1" = "ServerGo is a fast HTTP file server tool"
 "version.description_2" = "Similar to Python's http.server module, but offers better performance and more features"
 "version.author_title" = "Author Information"
@@ -50,6 +52,16 @@
 "flag.theme" = "Theme for directory listing"
 "flag.language" = "Interface language"
 "flag.auto_open" = "Automatically open browser after starting"
+"flag.auth_type" = "Authentication type: none, basic, token, form"
+"flag.username" = "Username for basic or form authentication"
+"flag.password" = "Password for basic or form authentication"
+"flag.token" = "Token for token authentication"
+"flag.login_page" = "Enable login page (only for form authentication)"
+
+# Authentication messages
+"auth.basic_credentials_required" = "Username and password are required for Basic authentication"
+"auth.token_required" = "Token is required for Token authentication"
+"auth.form_credentials_required" = "Username and password are required for Form authentication"
 
 # Error messages
 "error.port_unavailable" = "Port %d is not available"

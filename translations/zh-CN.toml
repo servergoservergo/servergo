@@ -35,6 +35,8 @@
 "version.version" = "版本: %s"
 "version.build_date" = "构建日期: %s"
 "version.git_commit" = "Git提交哈希: %s"
+"version.unknown_date" = "未知"
+"version.unknown_commit" = "未知"
 "version.description_1" = "ServerGo 是一个快速的HTTP文件服务器工具"
 "version.description_2" = "类似于Python的http.server模块，但提供更好的性能和更多功能"
 "version.author_title" = "作者信息"
@@ -50,6 +52,16 @@
 "flag.theme" = "目录列表主题"
 "flag.language" = "界面语言"
 "flag.auto_open" = "启动后自动打开浏览器"
+"flag.auth_type" = "认证类型：none(不认证), basic(HTTP基本认证), token(令牌认证), form(表单认证)"
+"flag.username" = "用于basic或form认证的用户名"
+"flag.password" = "用于basic或form认证的密码"
+"flag.token" = "用于token认证的令牌"
+"flag.login_page" = "是否启用登录页面（仅适用于form认证）"
+
+# 认证消息
+"auth.basic_credentials_required" = "使用Basic认证时必须同时提供用户名和密码"
+"auth.token_required" = "使用Token认证时必须提供令牌"
+"auth.form_credentials_required" = "使用Form认证时必须同时提供用户名和密码"
 
 # 错误消息
 "error.port_unavailable" = "端口 %d 不可用"

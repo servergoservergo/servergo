@@ -76,17 +76,17 @@ var startCmd = &cobra.Command{
 		case "basic":
 			authTypeEnum = auth.BasicAuth
 			if username == "" || password == "" {
-				return fmt.Errorf("使用Basic认证时必须同时提供用户名和密码")
+				return fmt.Errorf(i18n.T("auth.basic_credentials_required"))
 			}
 		case "token":
 			authTypeEnum = auth.TokenAuth
 			if token == "" {
-				return fmt.Errorf("使用Token认证时必须提供令牌")
+				return fmt.Errorf(i18n.T("auth.token_required"))
 			}
 		case "form":
 			authTypeEnum = auth.FormAuth
 			if username == "" || password == "" {
-				return fmt.Errorf("使用Form认证时必须同时提供用户名和密码")
+				return fmt.Errorf(i18n.T("auth.form_credentials_required"))
 			}
 		default:
 			authTypeEnum = auth.NoAuth
@@ -155,11 +155,11 @@ func init() {
 	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, i18n.T("flag.auto_open"))
 
 	// 添加认证相关的标志
-	startCmd.Flags().StringVarP(&authType, "auth", "a", "none", "认证类型：none(不认证), basic(HTTP基本认证), token(令牌认证), form(表单认证)")
-	startCmd.Flags().StringVarP(&username, "username", "u", "", "用于basic或form认证的用户名")
-	startCmd.Flags().StringVarP(&password, "password", "w", "", "用于basic或form认证的密码")
-	startCmd.Flags().StringVarP(&token, "token", "t", "", "用于token认证的令牌")
-	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, "是否启用登录页面（仅适用于form认证）")
+	startCmd.Flags().StringVarP(&authType, "auth", "a", "none", i18n.T("flag.auth_type"))
+	startCmd.Flags().StringVarP(&username, "username", "u", "", i18n.T("flag.username"))
+	startCmd.Flags().StringVarP(&password, "password", "w", "", i18n.T("flag.password"))
+	startCmd.Flags().StringVarP(&token, "token", "t", "", i18n.T("flag.token"))
+	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, i18n.T("flag.login_page"))
 
 	// 添加目录浏览相关的标志
 	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", true, i18n.T("config.enable_dir_listing"))
