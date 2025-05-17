@@ -51,6 +51,12 @@ export default function Layout() {
               示例
             </Link>
             <Link 
+              to="/install" 
+              className={`nav-link ${location.pathname === '/install' ? 'active' : ''}`}
+            >
+              安装
+            </Link>
+            <Link 
               to="/download" 
               className={`nav-link ${location.pathname === '/download' ? 'active' : ''}`}
             >

@@ -9,6 +9,7 @@ import Docs from './pages/Docs'
 import DocsIndex from './pages/docs/index'
 import Examples from './pages/Examples'
 import Download from './pages/Download'
+import Install from './pages/Install'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="docs/index" element={<DocsIndex />} />
           <Route path="examples" element={<Examples />} />
           <Route path="download" element={<Download />} />
+          <Route path="install" element={<Install />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
