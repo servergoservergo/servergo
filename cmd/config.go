@@ -181,7 +181,7 @@ var configGetCmd = &cobra.Command{
 			return fmt.Errorf("配置项 '%s' 不存在", key)
 		}
 
-		// 直接输出配置值，不带任何日志前缀
+		// 直接输出原始值，不做格式转换
 		fmt.Println(value)
 		return nil
 	},
