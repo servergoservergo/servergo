@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: '/servergo/', // 设置为仓库名，适配 GitHub Pages
   server: {
     // 在开发模式下正确处理单页应用路由
     port: 3000,
