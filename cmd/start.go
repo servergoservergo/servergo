@@ -48,22 +48,38 @@ var startCmd = &cobra.Command{
 	Short:   i18n.T("cmd.start.short"),
 	Long:    i18n.T("cmd.start.long"),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// 初始化配置
+		if err := config.InitConfig(); err != nil {
+			return err
+		}
+
 		// 读取配置中的默认值
 		cfg := config.GetConfig()
 
-		// 如果命令行未指定是否自动打开浏览器，使用配置中的设置
+		// 对所有配置项，如果命令行未指定则使用配置文件中的值
 		if !cmd.Flags().Changed("open") {
 			autoOpen = cfg.AutoOpen
+		}
+		if !cmd.Flags().Changed("dir-list") {
+			enableDirListing = cfg.EnableDirListing
+		}
+		if !cmd.Flags().Changed("theme") {
+			theme = cfg.Theme
+		}
+		if !cmd.Flags().Changed("language") {
+			if err := i18n.Init(cfg.Language); err != nil {
+				logger.Warning(fmt.Sprintf("初始化语言失败: %v", err))
+			}
 		}
 
 		// 如果用户提供了主题标志但没有值，显示可用主题
 		if cmd.Flags().Changed("theme") && theme == "" {
 			// 使用dirlist包中定义的有效主题列表
-			fmt.Println("可用主题:")
+			fmt.Println(i18n.T("cmd.theme.options"))
 			for _, t := range dirlist.ValidThemes {
 				fmt.Printf("  - %s\n", t)
 			}
-			fmt.Println("\n示例: --theme dark")
+			fmt.Println("\n" + i18n.T("errors.theme_help"))
 			os.Exit(0)
 		}
 
@@ -88,19 +104,10 @@ var startCmd = &cobra.Command{
 		switch authType {
 		case "basic":
 			authTypeEnum = auth.BasicAuth
-			if username == "" || password == "" {
-				return fmt.Errorf(i18n.T("auth.basic_credentials_required"))
-			}
 		case "token":
 			authTypeEnum = auth.TokenAuth
-			if token == "" {
-				return fmt.Errorf(i18n.T("auth.token_required"))
-			}
 		case "form":
 			authTypeEnum = auth.FormAuth
-			if username == "" || password == "" {
-				return fmt.Errorf(i18n.T("auth.form_credentials_required"))
-			}
 		default:
 			authTypeEnum = auth.NoAuth
 		}
@@ -165,7 +172,12 @@ func init() {
 	// 端口默认值为0，表示自动探测可用端口
 	startCmd.Flags().IntVarP(&port, "port", "p", 0, i18n.T("flag.port"))
 	startCmd.Flags().StringVarP(&dir, "dir", "d", ".", i18n.T("flag.dir"))
-	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", true, i18n.T("flag.auto_open"))
+
+	// 所有配置项的命令行标志默认值设为空或false
+	// 实际的默认值会从配置文件中读取，如果配置文件中没有才会使用 pkg/config/config.go 中定义的默认值
+	startCmd.Flags().BoolVarP(&autoOpen, "open", "o", false, i18n.T("flag.auto_open"))
+	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", false, i18n.T("flag.dir_list"))
+	startCmd.Flags().StringVarP(&theme, "theme", "m", "", i18n.T("flag.theme"))
 
 	// 添加认证相关的标志
 	startCmd.Flags().StringVarP(&authType, "auth", "a", "none", i18n.T("flag.auth_type"))
@@ -173,8 +185,4 @@ func init() {
 	startCmd.Flags().StringVarP(&password, "password", "w", "", i18n.T("flag.password"))
 	startCmd.Flags().StringVarP(&token, "token", "t", "", i18n.T("flag.token"))
 	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, i18n.T("flag.login_page"))
-
-	// 添加目录浏览相关的标志
-	startCmd.Flags().BoolVarP(&enableDirListing, "dir-list", "i", true, i18n.T("config.enable_dir_listing"))
-	startCmd.Flags().StringVarP(&theme, "theme", "m", "", i18n.T("config.theme"))
 }

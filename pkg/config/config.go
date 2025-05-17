@@ -28,6 +28,11 @@ type Config struct {
 	Theme string `mapstructure:"theme"`
 	// 界面语言
 	Language string `mapstructure:"language"`
+	// 是否启用日志持久化
+	EnableLogPersistence bool `mapstructure:"enable-log-persistence"`
+	// 认证相关配置
+	Username string `json:"username" yaml:"username"` // 默认用户名
+	Password string `json:"password" yaml:"password"` // 默认密码
 	// 其他配置项可以在这里添加
 }
 
@@ -95,6 +100,9 @@ func SaveConfig(cfg Config) error {
 	viper.Set("enable-dir-listing", cfg.EnableDirListing)
 	viper.Set("theme", cfg.Theme)
 	viper.Set("language", cfg.Language)
+	viper.Set("enable-log-persistence", cfg.EnableLogPersistence)
+	viper.Set("username", cfg.Username)
+	viper.Set("password", cfg.Password)
 	// 其他配置项设置...
 
 	// 获取配置目录
@@ -155,11 +163,27 @@ func GetLanguage() string {
 
 // 设置默认配置
 func SetDefaults() {
-	viper.SetDefault("auto-open", true)          // 默认自动打开浏览器
-	viper.SetDefault("enable-dir-listing", true) // 默认启用目录列表功能
-	viper.SetDefault("theme", "default")         // 默认使用默认主题
+	viper.SetDefault("auto-open", true)              // 默认自动打开浏览器
+	viper.SetDefault("enable-dir-listing", true)     // 默认启用目录列表功能
+	viper.SetDefault("theme", "default")             // 默认使用默认主题
+	viper.SetDefault("enable-log-persistence", true) // 默认启用日志持久化
+	viper.SetDefault("username", "admin")            // 默认用户名
+	viper.SetDefault("password", "")                 // 默认密码为空，将自动生成
 
 	// 语言默认设置为自动检测
 	detectLang := i18n.DetectOSLanguage()
 	viper.SetDefault("language", detectLang) // 默认使用系统语言
+}
+
+// DefaultConfig 返回默认配置
+func DefaultConfig() Config {
+	return Config{
+		AutoOpen:             true,
+		EnableDirListing:     true,
+		Theme:                "default",
+		Language:             i18n.DetectOSLanguage(),
+		EnableLogPersistence: true,
+		Username:             "admin", // 默认用户名
+		Password:             "",      // 默认密码为空，将自动生成
+	}
 }
