@@ -1,6 +1,6 @@
 import Card from '../../components/Card'
 import CodeBlock from '../../components/CodeBlock'
-import { FiLock, FiShield, FiUserCheck, FiEye } from 'react-icons/fi'
+import { FiShield, FiUserCheck, FiEye } from 'react-icons/fi'
 
 export default function Security() {
   return (
