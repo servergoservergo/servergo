@@ -1,0 +1,20 @@
+{
+    "path": "{{.DirPath}}",
+    "timestamp": "{{.CurrentTime}}",
+    "parent_directory": "{{.ParentDir}}",
+    "contents": [
+        {{- $length := len .Items -}}
+        {{- range $index, $item := .Items -}}
+        {
+            "name": "{{$item.Name}}",
+            "is_directory": {{$item.IsDir}},
+            "size": {{$item.SizeBytes}},
+            "size_formatted": "{{$item.Size}}",
+            "last_modified": "{{$item.LastModified}}",
+            "path": "{{$item.Path}}"{{if $item.IsDir}},
+            "url": "{{$item.Path}}/"{{else}},
+            "url": "{{$item.Path}}"{{end}}
+        }{{if lt $index (subtract $length 1)}},{{end}}
+        {{- end -}}
+    ]
+} 

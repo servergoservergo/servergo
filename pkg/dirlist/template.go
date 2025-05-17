@@ -2,6 +2,7 @@ package dirlist
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -20,6 +21,8 @@ const (
 	BlueTheme    = "blue"  // 新增蓝色主题
 	GreenTheme   = "green" // 新增绿色主题
 	RetroTheme   = "retro" // 新增复古主题
+	JsonTheme    = "json"  // 新增JSON主题，支持API调用
+	TableTheme   = "table" // 新增彩色表格主题
 )
 
 // DirListTemplate 表示目录列表模板
@@ -41,6 +44,7 @@ type FileItem struct {
 	Name         string // 文件名称
 	IsDir        bool   // 是否是目录
 	Size         string // 格式化后的大小
+	SizeBytes    int64  // 原始大小（字节）
 	LastModified string // 修改时间
 	Path         string // 文件相对路径
 }
@@ -53,6 +57,8 @@ func GetSupportedThemes() []string {
 		BlueTheme,
 		GreenTheme,
 		RetroTheme,
+		JsonTheme,
+		TableTheme,
 	}
 }
 
@@ -63,12 +69,35 @@ func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 		theme = DefaultTheme
 	}
 
+	// 对于特殊主题，不需要加载HTML模板文件
+	if theme == JsonTheme || theme == TableTheme {
+		return &DirListTemplate{
+			theme:    theme,
+			template: nil, // 对于特殊主题，不需要template对象
+		}, nil
+	}
+
 	// 加载模板
 	templatePath := fmt.Sprintf("templates/%s/index.html", theme)
 
+	// 创建模板函数映射
+	funcMap := template.FuncMap{
+		"subtract": func(a, b int) int {
+			return a - b
+		},
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"last": func(x int, a []FileItem) bool {
+			return x == len(a)-1
+		},
+	}
+
 	// 创建一个新的模板
-	// 不需要指定模板名称，直接使用ParseFS解析文件
-	tmpl, err := template.ParseFS(templatesFS, templatePath)
+	tmpl := template.New("").Funcs(funcMap)
+
+	// 解析模板文件
+	tmpl, err := tmpl.ParseFS(templatesFS, templatePath)
 	if err != nil {
 		// 如果指定主题加载失败，尝试回退到默认主题
 		if theme != DefaultTheme {
@@ -95,7 +124,20 @@ func isThemeValid(theme string) bool {
 
 // Render 渲染目录列表模板
 func (t *DirListTemplate) Render(data TemplateData) (string, error) {
-	// 使用模板渲染数据
+	// 对于特殊主题，使用特殊处理方式
+	switch t.theme {
+	case JsonTheme:
+		return t.renderJSON(data)
+	case TableTheme:
+		return renderTableTheme(data)
+	}
+
+	// 对于HTML主题，使用常规模板渲染
+	// 如果模板对象为nil，返回错误
+	if t.template == nil {
+		return "", fmt.Errorf("模板未初始化或主题 '%s' 不支持常规HTML渲染", t.theme)
+	}
+
 	result := &strings.Builder{}
 	if err := t.template.Execute(result, data); err != nil {
 		return "", fmt.Errorf("渲染模板失败: %v", err)
@@ -104,9 +146,76 @@ func (t *DirListTemplate) Render(data TemplateData) (string, error) {
 	return result.String(), nil
 }
 
+// renderJSON 直接渲染JSON数据，避免HTML模板的限制
+func (t *DirListTemplate) renderJSON(data TemplateData) (string, error) {
+	// 创建特殊的JSON结构
+	type jsonItem struct {
+		Name          string `json:"name"`
+		IsDirectory   bool   `json:"is_directory"`
+		Size          int64  `json:"size"`           // 改为数值类型的字节大小
+		SizeFormatted string `json:"size_formatted"` // 保留原格式化大小
+		LastModified  string `json:"last_modified"`
+		Path          string `json:"path"`
+		URL           string `json:"url"`
+	}
+
+	type jsonData struct {
+		Path            string     `json:"path"`
+		Timestamp       string     `json:"timestamp"`
+		ParentDirectory string     `json:"parent_directory"`
+		Contents        []jsonItem `json:"contents"`
+	}
+
+	// 转换数据
+	contents := make([]jsonItem, len(data.Items))
+	for i, item := range data.Items {
+		url := item.Path
+		if item.IsDir {
+			url += "/"
+		}
+
+		contents[i] = jsonItem{
+			Name:          item.Name,
+			IsDirectory:   item.IsDir,
+			Size:          item.SizeBytes,
+			SizeFormatted: item.Size,
+			LastModified:  item.LastModified,
+			Path:          item.Path,
+			URL:           url,
+		}
+	}
+
+	jsonResult := jsonData{
+		Path:            data.DirPath,
+		Timestamp:       data.CurrentTime,
+		ParentDirectory: data.ParentDir,
+		Contents:        contents,
+	}
+
+	// 序列化为JSON字符串
+	jsonBytes, err := json.MarshalIndent(jsonResult, "", "    ")
+	if err != nil {
+		return "", fmt.Errorf("JSON序列化失败: %v", err)
+	}
+
+	return string(jsonBytes), nil
+}
+
 // GetTheme 获取当前使用的主题
 func (t *DirListTemplate) GetTheme() string {
 	return t.theme
+}
+
+// GetContentType 获取输出内容类型
+func (t *DirListTemplate) GetContentType() string {
+	switch t.theme {
+	case JsonTheme:
+		return "application/json"
+	case TableTheme:
+		return "text/plain; charset=utf-8"
+	default:
+		return "text/html; charset=utf-8"
+	}
 }
 
 // GetStaticAssets 获取静态资源文件系统
