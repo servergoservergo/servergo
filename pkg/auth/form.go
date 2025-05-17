@@ -32,7 +32,24 @@ func (a *FormAuthenticator) Middleware() gin.HandlerFunc {
 		if strings.HasPrefix(c.Request.URL.Path, "/auth/") &&
 			(strings.HasSuffix(c.Request.URL.Path, ".css") ||
 				strings.HasSuffix(c.Request.URL.Path, ".js")) {
-			c.Next()
+			// 尝试从嵌入式文件系统中读取静态资源
+			filename := strings.TrimPrefix(c.Request.URL.Path, "/auth/")
+			content, err := GetFileContent(filename)
+			if err != nil {
+				c.String(http.StatusNotFound, "File not found")
+				c.Abort()
+				return
+			}
+
+			// 设置正确的Content-Type
+			if strings.HasSuffix(filename, ".css") {
+				c.Header("Content-Type", "text/css")
+			} else if strings.HasSuffix(filename, ".js") {
+				c.Header("Content-Type", "application/javascript")
+			}
+
+			c.String(http.StatusOK, content)
+			c.Abort()
 			return
 		}
 
@@ -98,9 +115,6 @@ func (a *FormAuthenticator) Middleware() gin.HandlerFunc {
 
 // SetupRoutes 设置表单认证的路由
 func (a *FormAuthenticator) SetupRoutes(router *gin.Engine) {
-	// 提供静态资源
-	router.StaticFS("/auth", GetAuthFileSystem())
-
 	// 登录处理在中间件中已经实现，这里不需要额外的路由
 }
 
@@ -112,4 +126,9 @@ func (a *FormAuthenticator) AuthType() AuthType {
 // LoginPageEnabled 返回是否启用了登录页
 func (a *FormAuthenticator) LoginPageEnabled() bool {
 	return a.enableLoginPage
+}
+
+// GetCredentials 返回认证凭据
+func (a *FormAuthenticator) GetCredentials() (username, password string) {
+	return a.username, a.password
 }

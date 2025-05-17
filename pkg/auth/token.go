@@ -49,3 +49,8 @@ func (a *TokenAuthenticator) AuthType() AuthType {
 func (a *TokenAuthenticator) LoginPageEnabled() bool {
 	return false
 }
+
+// GetCredentials 返回认证凭据
+func (a *TokenAuthenticator) GetCredentials() (username, password string) {
+	return "", a.token
+}

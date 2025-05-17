@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,6 +28,8 @@ type Authenticator interface {
 	AuthType() AuthType
 	// LoginPageEnabled 返回是否启用了登录页
 	LoginPageEnabled() bool
+	// GetCredentials 返回认证凭据
+	GetCredentials() (username, password string)
 }
 
 // Config 保存认证配置
@@ -46,6 +50,29 @@ type Config struct {
 
 // NewAuthenticator 根据配置创建一个认证器
 func NewAuthenticator(config Config) Authenticator {
+	// 获取全局配置
+	globalConfig := config.GetGlobalConfig()
+
+	// 如果命令行没有指定用户名，使用全局配置
+	if config.Username == "" {
+		config.Username = globalConfig.Username
+	}
+
+	// 如果命令行没有指定密码，使用全局配置
+	if config.Password == "" {
+		config.Password = globalConfig.Password
+	}
+
+	// 如果密码仍然为空，生成随机密码
+	if config.Password == "" {
+		config.Password = utils.GenerateRandomPassword(16, false)
+	}
+
+	// 如果是TokenAuth且没有指定token，生成随机token
+	if config.Type == TokenAuth && config.Token == "" {
+		config.Token = utils.GenerateRandomPassword(32, true) // token使用更长的长度和特殊字符
+	}
+
 	switch config.Type {
 	case BasicAuth:
 		return NewBasicAuth(config)
@@ -56,6 +83,11 @@ func NewAuthenticator(config Config) Authenticator {
 	default:
 		return NewNoAuth()
 	}
+}
+
+// GetGlobalConfig 获取全局配置
+func (c *Config) GetGlobalConfig() config.Config {
+	return config.DefaultConfig()
 }
 
 // NoAuthenticator 实现了一个不进行认证的认证器
@@ -81,4 +113,9 @@ func (a *NoAuthenticator) AuthType() AuthType {
 // LoginPageEnabled 返回是否启用了登录页
 func (a *NoAuthenticator) LoginPageEnabled() bool {
 	return false
+}
+
+// GetCredentials 返回认证凭据
+func (a *NoAuthenticator) GetCredentials() (username, password string) {
+	return "", ""
 }

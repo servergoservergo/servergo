@@ -42,3 +42,8 @@ func (a *BasicAuthenticator) AuthType() AuthType {
 func (a *BasicAuthenticator) LoginPageEnabled() bool {
 	return false // Basic Auth使用浏览器自带的认证对话框
 }
+
+// GetCredentials 返回认证凭据
+func (a *BasicAuthenticator) GetCredentials() (username, password string) {
+	return a.username, a.password
+}
