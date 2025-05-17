@@ -31,6 +31,10 @@ var (
 	// 目录浏览相关标志
 	enableDirListing bool   // 是否启用目录列表功能
 	theme            string // 目录列表主题
+
+	// 日志相关标志
+	logLevel             string // 日志级别
+	enableLogPersistence bool   // 是否启用日志持久化
 )
 
 // 别名列表 - 预留位置供后续扩展
@@ -69,6 +73,57 @@ var startCmd = &cobra.Command{
 		if !cmd.Flags().Changed("language") {
 			if err := i18n.Init(cfg.Language); err != nil {
 				logger.Warning(fmt.Sprintf("初始化语言失败: %v", err))
+			}
+		}
+		if !cmd.Flags().Changed("enable-log-persistence") {
+			enableLogPersistence = cfg.EnableLogPersistence
+		}
+
+		// 设置日志级别
+		if cmd.Flags().Changed("log-level") {
+			switch logLevel {
+			case "debug":
+				logger.Default.SetLevel(logger.DEBUG)
+			case "info":
+				logger.Default.SetLevel(logger.INFO)
+			case "warn", "warning":
+				logger.Default.SetLevel(logger.WARNING)
+			case "error":
+				logger.Default.SetLevel(logger.ERROR)
+			default:
+				logger.Warning(i18n.Tf("error.invalid_log_level", logLevel))
+				logger.Default.SetLevel(logger.INFO) // 默认使用INFO级别
+			}
+		}
+
+		// 处理日志持久化设置
+		if cmd.Flags().Changed("enable-log-persistence") {
+			// 如果命令行指定了日志持久化设置，则更新配置
+			cfg := config.GetConfig()
+			cfg.EnableLogPersistence = enableLogPersistence
+
+			// 保存更新后的配置
+			if err := config.SaveConfig(cfg); err != nil {
+				logger.Warning(i18n.Tf("error.save_config_failed", err))
+			}
+
+			// 重新初始化日志系统
+			logConfig := logger.LogConfig{
+				Level:         logger.Default.GetLevel(),
+				EnableFileLog: enableLogPersistence,
+				Filename:      "servergo.log",
+			}
+
+			newLogger, err := logger.New(logConfig)
+			if err != nil {
+				logger.Warning(i18n.Tf("error.logger_init_failed", err))
+			} else {
+				logger.Default = newLogger
+				if enableLogPersistence {
+					logger.Info(i18n.T("logger.persistence_enabled"))
+				} else {
+					logger.Info(i18n.T("logger.persistence_disabled"))
+				}
 			}
 		}
 
@@ -185,4 +240,8 @@ func init() {
 	startCmd.Flags().StringVarP(&password, "password", "w", "", i18n.T("flag.password"))
 	startCmd.Flags().StringVarP(&token, "token", "t", "", i18n.T("flag.token"))
 	startCmd.Flags().BoolVarP(&enableLoginPage, "login-page", "l", false, i18n.T("flag.login_page"))
+
+	// 添加日志相关的标志
+	startCmd.Flags().StringVar(&logLevel, "log-level", "info", i18n.T("flag.log_level"))
+	startCmd.Flags().BoolVar(&enableLogPersistence, "enable-log-persistence", false, i18n.T("flag.enable_log_persistence"))
 }

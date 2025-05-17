@@ -49,9 +49,27 @@ func init() {
 
 // Execute 添加所有子命令到根命令并执行
 func Execute() {
-	// 如果没有提供子命令，则修改参数列表，使其包含 "start" 子命令
-	if len(os.Args) == 1 {
-		os.Args = append(os.Args, "start")
+	// 检查是否提供了子命令
+	hasSubCommand := false
+	if len(os.Args) > 1 {
+		// 检查第一个参数是否是子命令而不是标志
+		potentialCmd := os.Args[1]
+		for _, cmd := range RootCmd.Commands() {
+			if cmd.Name() == potentialCmd || contains(cmd.Aliases, potentialCmd) {
+				hasSubCommand = true
+				break
+			}
+		}
+	}
+
+	// 如果没有提供子命令（无论是否有标志参数），则添加 "start" 子命令
+	if !hasSubCommand {
+		// 保存原始参数
+		originalArgs := os.Args[1:]
+		// 重置参数列表，加入 "start" 子命令
+		os.Args = append([]string{os.Args[0]}, "start")
+		// 添加原始参数
+		os.Args = append(os.Args, originalArgs...)
 		logger.Debug(i18n.T("cmd.default_start"))
 	}
 
@@ -72,6 +90,16 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, i18n.T("error.prefix"), friendlyErrMsg)
 		os.Exit(1)
 	}
+}
+
+// contains 检查字符串切片是否包含指定值
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
 
 // UpdateCommandDescriptions 更新所有命令的描述为当前语言

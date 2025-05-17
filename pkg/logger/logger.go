@@ -172,6 +172,11 @@ func (l *Logger) SetLevel(level int) {
 	l.level = level
 }
 
+// GetLevel 获取当前日志级别
+func (l *Logger) GetLevel() int {
+	return l.level
+}
+
 // formatMessage 格式化日志消息
 func (l *Logger) formatMessage(level int, format string, args ...interface{}) (string, string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
