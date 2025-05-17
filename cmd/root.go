@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/CC11001100/servergo/pkg/config"
@@ -43,8 +44,15 @@ func Execute() {
 		logger.Debug("未指定子命令，默认运行start命令")
 	}
 
-	if err := RootCmd.Execute(); err != nil {
-		logger.Error("执行命令时发生错误: %v", err)
+	// 阻止Cobra默认的错误打印和使用说明打印
+	RootCmd.SilenceErrors = true
+	RootCmd.SilenceUsage = true
+
+	// 执行命令
+	err := RootCmd.Execute()
+	if err != nil {
+		// 使用fmt直接打印错误到标准错误输出，不使用logger避免日期前缀等
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 }

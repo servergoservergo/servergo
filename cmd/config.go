@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"errors"
+
 	"github.com/CC11001100/servergo/pkg/config"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -101,12 +103,65 @@ var configListCmd = &cobra.Command{
 	},
 }
 
+// 生成配置命令缺少参数的友好错误信息
+func generateConfigCommandHelp(cmdName string, args []string) string {
+	var msg strings.Builder
+
+	if cmdName == "get" {
+		msg.WriteString("缺少参数：请提供一个配置项名称\n\n")
+	} else if cmdName == "set" {
+		if len(args) == 0 {
+			msg.WriteString("缺少参数：请提供配置项名称和值\n\n")
+		} else {
+			msg.WriteString("缺少参数：请提供配置项的值\n\n")
+		}
+	}
+
+	msg.WriteString("可用的配置项:\n")
+	for _, key := range validConfigKeys {
+		fmt.Fprintf(&msg, "  - %s\n", key)
+	}
+
+	msg.WriteString("\n使用说明:\n")
+	if cmdName == "get" {
+		msg.WriteString("  servergo config get <配置项>\n\n")
+		msg.WriteString("示例:\n")
+		msg.WriteString("  servergo config get auto-open\n")
+		msg.WriteString("  servergo config get theme\n")
+		msg.WriteString("  servergo config get enable-dir-listing\n")
+	} else if cmdName == "set" {
+		msg.WriteString("  servergo config set <配置项> <值>\n\n")
+		msg.WriteString("示例:\n")
+		msg.WriteString("  servergo config set auto-open false       # 关闭自动打开浏览器\n")
+		msg.WriteString("  servergo config set theme dark            # 设置暗色主题\n")
+		msg.WriteString("  servergo config set enable-dir-listing true   # 启用目录列表\n")
+
+		if len(args) == 1 {
+			msg.WriteString("\n您提供的配置项: " + args[0] + "\n")
+			if args[0] == "theme" {
+				msg.WriteString("可选主题: default, dark, blue, green, retro, json, table\n")
+			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" {
+				msg.WriteString("可接受的布尔值: true/false, yes/no, 1/0\n")
+			}
+		}
+	}
+
+	return msg.String()
+}
+
 // configGetCmd 获取指定配置
 var configGetCmd = &cobra.Command{
 	Use:   "get [key]",
 	Short: "获取指定配置",
 	Long:  `获取指定配置项的当前值。`,
-	Args:  cobra.ExactArgs(1),
+	// 不使用标准参数验证，改用自定义验证
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			// 直接返回原始错误字符串，不需要格式化，避免fmt错误信息重复
+			return errors.New(generateConfigCommandHelp("get", args))
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 初始化配置
 		if err := config.InitConfig(); err != nil {
@@ -137,7 +192,14 @@ var configSetCmd = &cobra.Command{
 	Use:   "set [key] [value]",
 	Short: "设置指定配置",
 	Long:  `设置指定配置项的值。`,
-	Args:  cobra.ExactArgs(2),
+	// 不使用标准参数验证，改用自定义验证
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 2 {
+			// 直接返回原始错误字符串，不需要格式化，避免fmt错误信息重复
+			return errors.New(generateConfigCommandHelp("set", args))
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 初始化配置
 		if err := config.InitConfig(); err != nil {
