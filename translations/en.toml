@@ -63,6 +63,21 @@
 "config.theme" = "Theme"
 "config.language" = "Language"
 "config.language_changed" = "Language has been changed to %s"
+"config.language_init_error" = "Language setting has been saved, but there was an error initializing i18n support: %v"
+"config.current_config" = "ServerGo Current Configuration"
+"config.file_path" = "Configuration file path: %s"
+"config.file_not_created" = "Configuration file not created yet, using default values"
+"config.default_path" = "Default configuration file path will be: %s"
+"config.item" = "Item"
+"config.current_value" = "Current Value"
+"config.description" = "Description"
+"config.auto_open_desc" = "Automatically open browser after starting"
+"config.enable_dir_listing_desc" = "Enable directory listing feature"
+"config.theme_desc" = "Directory listing theme"
+"config.language_desc" = "Interface language"
+"config.enabled" = "Enabled"
+"config.disabled" = "Disabled"
+"config.item_set" = "Configuration item '%s' has been set to '%s'"
 
 # Server related
 "server.starting" = "Starting file server at http://localhost:%d"
@@ -70,11 +85,15 @@
 "server.dir_listing_enabled" = "Directory listing enabled (theme: %s)"
 "server.dir_listing_disabled" = "Directory listing disabled"
 "server.press_ctrl_c" = "Press Ctrl+C to stop the server"
+"server.browser_opened" = "Opened %s in browser"
+"server.browser_error" = "Cannot open browser: %v\nPlease visit: %s manually"
+"server.os_not_supported" = "Unsupported operating system, cannot open browser automatically, please visit: %s manually"
 
 # Authentication
 "auth.disabled" = "Authentication disabled"
 "auth.basic_enabled" = "Basic authentication enabled"
 "auth.token_enabled" = "Token authentication enabled"
+"auth.token_access" = "Access with URL parameter ?token=%s or Authorization header"
 "auth.form_enabled" = "Form authentication enabled"
 "auth.login_page_enabled" = "Login page enabled, visit /auth/login to login"
 
@@ -82,4 +101,11 @@
 "http.404" = "404 Not Found: %s"
 "http.403" = "403 Forbidden: Directory listing disabled"
 "http.500_dir_content" = "Failed to read directory content: %v"
-"http.500_template" = "Template rendering error: %v" 
+"http.500_template" = "Template rendering error: %v"
+
+# I18n related
+"i18n.en_load_failed" = "Failed to load English translation file: %v"
+"i18n.en_load_success" = "Successfully loaded external English translation file: %s"
+"i18n.zh_load_failed" = "Failed to load Chinese translation file: %v"
+"i18n.zh_load_success" = "Successfully loaded external Chinese translation file: %s"
+"i18n.init_failed" = "Failed to initialize internationalization support: %v" 

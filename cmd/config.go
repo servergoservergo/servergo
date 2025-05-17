@@ -59,12 +59,12 @@ var configListCmd = &cobra.Command{
 		}
 
 		// 先单独显示配置文件路径信息
-		logger.Info("ServerGo 当前配置")
+		logger.Info(i18n.T("config.current_config"))
 		if fileExists {
-			logger.Info("配置文件路径: %s", cfgPath)
+			logger.Info(i18n.Tf("config.file_path", cfgPath))
 		} else {
-			logger.Info("配置文件尚未创建，当前使用默认配置")
-			logger.Info("默认配置文件路径将为: %s", cfgPath)
+			logger.Info(i18n.T("config.file_not_created"))
+			logger.Info(i18n.Tf("config.default_path", cfgPath))
 		}
 		logger.Info("")
 
@@ -76,14 +76,14 @@ var configListCmd = &cobra.Command{
 		t.SetStyle(table.StyleColoredBright)
 
 		// 设置表头
-		t.AppendHeader(table.Row{"配置项", "当前值", "说明"})
+		t.AppendHeader(table.Row{i18n.T("config.item"), i18n.T("config.current_value"), i18n.T("config.description")})
 
 		// 添加配置信息行
 		t.AppendRows([]table.Row{
-			{"auto-open", formatBoolValue(cfg.AutoOpen), "启动服务器后是否自动打开浏览器"},
-			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), "是否启用目录列表功能"},
-			{"theme", cfg.Theme, "目录列表主题"},
-			{"language", formatLanguageValue(cfg.Language), "界面语言"},
+			{"auto-open", formatBoolValue(cfg.AutoOpen), i18n.T("config.auto_open_desc")},
+			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), i18n.T("config.enable_dir_listing_desc")},
+			{"theme", cfg.Theme, i18n.T("config.theme_desc")},
+			{"language", formatLanguageValue(cfg.Language), i18n.T("config.language_desc")},
 		})
 
 		// 设置列对齐方式
@@ -228,16 +228,15 @@ var configSetCmd = &cobra.Command{
 			return fmt.Errorf("无法保存配置: %v", err)
 		}
 
-		// 特殊处理：如果更改的是语言设置，需要重新初始化i18n
+		// 特殊处理语言变化的消息
 		if key == "language" {
 			if err := i18n.Init(value); err != nil {
-				logger.Warning("语言设置已保存，但初始化国际化支持时出现错误：%v", err)
-			} else {
-				languageDisplayName := i18n.GetLanguageDisplayName(value)
-				logger.Info("界面语言已更改为: %s", languageDisplayName)
+				logger.Warning(i18n.Tf("config.language_init_error", err))
 			}
+			languageDisplayName := i18n.GetLanguageDisplayName(value)
+			logger.Info(i18n.Tf("config.language_changed", languageDisplayName))
 		} else {
-			logger.Info("配置项 '%s' 已设置为 '%s'", key, value)
+			logger.Info(i18n.Tf("config.item_set", key, value))
 		}
 
 		return nil
@@ -334,12 +333,12 @@ func setConfigValue(key, value string) error {
 	return nil
 }
 
-// 格式化布尔值，使其更易读（添加颜色）
+// formatBoolValue 格式化布尔值为更友好的显示文本
 func formatBoolValue(value bool) string {
 	if value {
-		return text.Colors{text.FgGreen, text.Bold}.Sprint("开启")
+		return i18n.T("config.enabled")
 	}
-	return text.Colors{text.FgRed}.Sprint("关闭")
+	return i18n.T("config.disabled")
 }
 
 // 格式化语言值，显示友好的语言名称

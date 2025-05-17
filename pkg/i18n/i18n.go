@@ -2,7 +2,6 @@ package i18n
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,45 +16,50 @@ import (
 
 // 支持的语言常量
 const (
-	LangEnglish = "en"
-	LangChinese = "zh-CN"
-	LangDefault = LangEnglish // 默认回退语言
+	// LangEN 英语
+	LangEN = "en"
+	// LangZH 简体中文
+	LangZH = "zh-CN"
+	// LangDefault 默认语言
+	LangDefault = LangEN
+	// DefaultLanguage 默认语言
+	DefaultLanguage = LangEN
 )
 
 //go:embed translations/*.toml
 var embeddedTranslations embed.FS
 
 var (
-	bundle    *i18n.Bundle
-	localizer *i18n.Localizer
-	mutex     sync.RWMutex
-	loaded    bool
+	bundle          *i18n.Bundle
+	localizer       *i18n.Localizer
+	mutex           sync.RWMutex
+	loaded          bool
+	currentLanguage string
+	initMutex       sync.Mutex
 )
 
-// Init 初始化i18n包
+// Init 初始化国际化支持
 func Init(lang string) error {
-	mutex.Lock()
-	defer mutex.Unlock()
+	// 防止并发初始化
+	initMutex.Lock()
+	defer initMutex.Unlock()
 
-	// 如果未指定语言，尝试检测系统语言
+	// 如果语言未指定，使用默认语言
 	if lang == "" {
-		lang = DetectOSLanguage()
+		lang = DefaultLanguage
 	}
 
-	// 只支持特定语言，不支持的语言回退到默认语言
+	// 验证语言是否受支持
 	if !IsSupportedLanguage(lang) {
-		lang = LangDefault
+		return fmt.Errorf("unsupported language: %s", lang)
 	}
 
-	// 创建一个新的Bundle并设置默认语言
+	// 创建一个新的Bundle，使用英语作为回退语言
 	bundle = i18n.NewBundle(language.English)
-
-	// 注册解析函数，根据文件扩展名选择相应的解析器
-	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
 	// 加载翻译文件
-	err := loadTranslations(lang)
+	err := loadTranslations()
 	if err != nil {
 		return fmt.Errorf("failed to load translations: %v", err)
 	}
@@ -63,7 +67,9 @@ func Init(lang string) error {
 	// 创建本地化器
 	localizer = i18n.NewLocalizer(bundle, lang)
 
-	loaded = true
+	// 保存当前语言
+	currentLanguage = lang
+
 	return nil
 }
 
@@ -83,10 +89,10 @@ func GetCurrentLanguage() string {
 	for _, lang := range bundle.LanguageTags() {
 		langStr := lang.String()
 		if strings.HasPrefix(langStr, "zh") {
-			currentLanguage = LangChinese
+			currentLanguage = LangZH
 			break
 		} else if strings.HasPrefix(langStr, "en") {
-			currentLanguage = LangEnglish
+			currentLanguage = LangEN
 			break
 		}
 	}
@@ -113,7 +119,7 @@ func SetLanguage(lang string) error {
 // IsSupportedLanguage 检查指定语言是否受支持
 func IsSupportedLanguage(lang string) bool {
 	switch lang {
-	case LangEnglish, LangChinese:
+	case LangEN, LangZH:
 		return true
 	default:
 		return false
@@ -122,15 +128,15 @@ func IsSupportedLanguage(lang string) bool {
 
 // GetSupportedLanguages 获取所有支持的语言列表
 func GetSupportedLanguages() []string {
-	return []string{LangEnglish, LangChinese}
+	return []string{LangEN, LangZH}
 }
 
 // GetLanguageDisplayName 获取语言的显示名称
 func GetLanguageDisplayName(lang string) string {
 	switch lang {
-	case LangEnglish:
+	case LangEN:
 		return "English"
-	case LangChinese:
+	case LangZH:
 		return "中文(简体)"
 	default:
 		return lang
@@ -154,10 +160,10 @@ func DetectOSLanguage() string {
 				langCode := strings.Replace(langParts[0], "_", "-", -1)
 				// 简单匹配支持的语言
 				if strings.HasPrefix(langCode, "zh") {
-					return LangChinese
+					return LangZH
 				}
 				if strings.HasPrefix(langCode, "en") {
-					return LangEnglish
+					return LangEN
 				}
 			}
 		}
@@ -168,79 +174,54 @@ func DetectOSLanguage() string {
 }
 
 // loadTranslations 加载翻译文件
-func loadTranslations(lang string) error {
-	// 从嵌入式文件系统加载翻译数据
-	err := loadEmbeddedTranslations()
-	if err != nil {
-		return fmt.Errorf("failed to load embedded translations: %v", err)
-	}
+func loadTranslations() error {
+	// 先尝试加载嵌入式翻译
+	loadEmbeddedTranslations()
 
-	// 尝试从外部文件加载（如果存在）
-	// 获取可执行文件路径
-	exePath, err := os.Executable()
-	if err != nil {
-		// 忽略错误，只使用内嵌翻译
-		return nil
-	}
-
-	// 翻译文件目录（与可执行文件同级的translations目录）
-	transDir := filepath.Join(filepath.Dir(exePath), "translations")
-
-	// 如果外部翻译目录存在，尝试加载外部翻译文件
-	if _, err := os.Stat(transDir); err == nil {
-		enFile := filepath.Join(transDir, "en.toml")
-		zhFile := filepath.Join(transDir, "zh-CN.toml")
-
-		// 尝试加载英文翻译文件（如果存在）
-		if _, err := os.Stat(enFile); err == nil {
-			// LoadMessageFile返回两个值：消息文件和错误
-			_, loadErr := bundle.LoadMessageFile(enFile)
-			if loadErr != nil {
-				logger.Info("加载英文翻译文件失败: %v", loadErr)
-			} else {
-				logger.Info("加载外部英文翻译文件成功: %s", enFile)
-			}
+	// 再尝试从外部文件加载翻译
+	// 尝试加载英文翻译
+	enFile := filepath.Join("translations", "en.toml")
+	if _, err := os.Stat(enFile); err == nil {
+		_, loadErr := bundle.LoadMessageFile(enFile)
+		if loadErr != nil {
+			// 只有在出错时才记录日志
+			logger.Info("Failed to load English translation file: %v", loadErr)
 		}
+	}
 
-		// 尝试加载中文翻译文件（如果存在）
-		if _, err := os.Stat(zhFile); err == nil {
-			// LoadMessageFile返回两个值：消息文件和错误
-			_, loadErr := bundle.LoadMessageFile(zhFile)
-			if loadErr != nil {
-				logger.Info("加载中文翻译文件失败: %v", loadErr)
-			} else {
-				logger.Info("加载外部中文翻译文件成功: %s", zhFile)
-			}
+	// 尝试加载中文翻译
+	zhFile := filepath.Join("translations", "zh-CN.toml")
+	if _, err := os.Stat(zhFile); err == nil {
+		_, loadErr := bundle.LoadMessageFile(zhFile)
+		if loadErr != nil {
+			// 只有在出错时才记录日志
+			logger.Info("Failed to load Chinese translation file: %v", loadErr)
 		}
 	}
 
 	return nil
 }
 
-// loadEmbeddedTranslations 加载内嵌的翻译数据
+// loadEmbeddedTranslations 从嵌入式文件系统加载翻译
 func loadEmbeddedTranslations() error {
-	// 加载嵌入式英文翻译
+	// 加载英文翻译
 	enData, err := embeddedTranslations.ReadFile("translations/en.toml")
 	if err != nil {
-		return fmt.Errorf("failed to read embedded English translation: %v", err)
+		return fmt.Errorf("failed to read embedded English translations: %v", err)
 	}
-
-	// 加载嵌入式中文翻译
-	zhData, err := embeddedTranslations.ReadFile("translations/zh-CN.toml")
-	if err != nil {
-		return fmt.Errorf("failed to read embedded Chinese translation: %v", err)
-	}
-
-	// 解析英文翻译
 	_, err = bundle.ParseMessageFileBytes(enData, "en.toml")
 	if err != nil {
-		return fmt.Errorf("failed to parse English translation: %v", err)
+		return fmt.Errorf("failed to parse embedded English translations: %v", err)
 	}
 
-	// 解析中文翻译
+	// 加载中文翻译
+	zhData, err := embeddedTranslations.ReadFile("translations/zh-CN.toml")
+	if err != nil {
+		return fmt.Errorf("failed to read embedded Chinese translations: %v", err)
+	}
 	_, err = bundle.ParseMessageFileBytes(zhData, "zh-CN.toml")
 	if err != nil {
-		return fmt.Errorf("failed to parse Chinese translation: %v", err)
+		return fmt.Errorf("failed to parse embedded Chinese translations: %v", err)
 	}
 
 	return nil

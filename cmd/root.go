@@ -35,8 +35,7 @@ func init() {
 	// 初始化国际化支持
 	cfg := config.GetConfig()
 	if err := i18n.Init(cfg.Language); err != nil {
-		// 初始化失败时记录错误，但不中断程序执行
-		logger.Warning("初始化国际化支持失败: %v", err)
+		logger.Warning(i18n.Tf("i18n.init_failed", err))
 	} else {
 		// 更新命令的描述为当前语言
 		RootCmd.Short = i18n.T("cmd.root.short")

@@ -12,6 +12,7 @@ import (
 
 	"github.com/CC11001100/servergo/pkg/auth"
 	"github.com/CC11001100/servergo/pkg/dirlist"
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 )
 
@@ -178,36 +179,38 @@ func (fs *FileServer) Start() error {
 	// 使用NoRoute处理所有未匹配的路由
 	fs.engine.NoRoute(fs.handleFileRequest)
 
-	// 启动服务器
-	hostAddr := ":" + strconv.Itoa(fs.config.Port)
-	logger.Info("Starting file server at http://localhost:%d", fs.config.Port)
-	logger.Info("Serving directory: %s", fs.absDir)
+	// 打印服务器信息
+	logger.Info(i18n.Tf("server.starting", fs.config.Port))
+	logger.Info(i18n.Tf("server.serving_dir", fs.absDir))
 
-	// 显示功能信息
+	// 打印目录列表状态
 	if fs.config.EnableDirListing {
-		logger.Info("Directory listing enabled (theme: %s)", fs.dirTemplate.GetTheme())
+		logger.Info(i18n.Tf("server.dir_listing_enabled", fs.dirTemplate.GetTheme()))
 	} else {
-		logger.Info("Directory listing disabled")
+		logger.Info(i18n.T("server.dir_listing_disabled"))
 	}
 
-	// 显示认证信息
+	// 打印认证信息
 	switch fs.authenticator.AuthType() {
 	case auth.NoAuth:
-		logger.Info("Authentication disabled")
+		logger.Info(i18n.T("auth.disabled"))
 	case auth.BasicAuth:
-		logger.Info("Basic authentication enabled")
+		logger.Info(i18n.T("auth.basic_enabled"))
 	case auth.TokenAuth:
-		logger.Info("Token authentication enabled")
-		logger.Info("Access with URL parameter ?token=%s or Authorization header", fs.config.Token)
+		logger.Info(i18n.T("auth.token_enabled"))
+		logger.Info(i18n.Tf("auth.token_access", fs.config.Token))
 	case auth.FormAuth:
-		logger.Info("Form authentication enabled")
+		logger.Info(i18n.T("auth.form_enabled"))
 		if fs.authenticator.LoginPageEnabled() {
-			logger.Info("Login page enabled, visit /auth/login to login")
+			logger.Info(i18n.T("auth.login_page_enabled"))
 		}
 	}
 
-	logger.Info("Press Ctrl+C to stop the server")
+	// 提示用户如何停止服务器
+	logger.Info(i18n.T("server.press_ctrl_c"))
 
+	// 启动服务器
+	hostAddr := ":" + strconv.Itoa(fs.config.Port)
 	return fs.engine.Run(hostAddr)
 }
 

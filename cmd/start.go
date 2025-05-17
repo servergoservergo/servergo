@@ -134,14 +134,14 @@ func openBrowser(url string) {
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
-		logger.Warning("不支持的操作系统，无法自动打开浏览器，请手动访问: %s", url)
+		logger.Warning(i18n.Tf("server.os_not_supported", url))
 		return
 	}
 
 	if err != nil {
-		logger.Error("无法打开浏览器: %v\n请手动访问: %s", err, url)
+		logger.Error(i18n.Tf("server.browser_error", err, url))
 	} else {
-		logger.Info("已在浏览器中打开 %s", url)
+		logger.Info(i18n.Tf("server.browser_opened", url))
 	}
 }
 

@@ -63,6 +63,21 @@
 "config.theme" = "主题"
 "config.language" = "语言"
 "config.language_changed" = "语言已更改为 %s"
+"config.language_init_error" = "语言设置已保存，但初始化国际化支持时出现错误：%v"
+"config.current_config" = "ServerGo 当前配置"
+"config.file_path" = "配置文件路径: %s"
+"config.file_not_created" = "配置文件尚未创建，当前使用默认配置"
+"config.default_path" = "默认配置文件路径将为: %s"
+"config.item" = "配置项"
+"config.current_value" = "当前值"
+"config.description" = "说明"
+"config.auto_open_desc" = "启动服务器后是否自动打开浏览器"
+"config.enable_dir_listing_desc" = "是否启用目录列表功能"
+"config.theme_desc" = "目录列表主题"
+"config.language_desc" = "界面语言"
+"config.enabled" = "开启"
+"config.disabled" = "关闭"
+"config.item_set" = "配置项 '%s' 已设置为 '%s'"
 
 # 服务器相关
 "server.starting" = "启动文件服务器在 http://localhost:%d"
@@ -70,11 +85,15 @@
 "server.dir_listing_enabled" = "目录浏览功能已启用 (主题: %s)"
 "server.dir_listing_disabled" = "目录浏览功能已禁用"
 "server.press_ctrl_c" = "按 Ctrl+C 停止服务器"
+"server.browser_opened" = "已在浏览器中打开 %s"
+"server.browser_error" = "无法打开浏览器: %v\n请手动访问: %s"
+"server.os_not_supported" = "不支持的操作系统，无法自动打开浏览器，请手动访问: %s"
 
 # 认证
 "auth.disabled" = "未启用认证"
 "auth.basic_enabled" = "启用了基本认证"
 "auth.token_enabled" = "启用了令牌认证"
+"auth.token_access" = "可通过URL参数?token=%s或Authorization头部访问"
 "auth.form_enabled" = "启用了表单认证"
 "auth.login_page_enabled" = "登录页面已启用，访问 /auth/login 进行登录"
 
@@ -82,4 +101,11 @@
 "http.404" = "404 未找到: %s"
 "http.403" = "403 禁止访问: 目录列表功能已禁用"
 "http.500_dir_content" = "无法读取目录内容: %v"
-"http.500_template" = "模板渲染错误: %v" 
+"http.500_template" = "模板渲染错误: %v"
+
+# 国际化相关
+"i18n.en_load_failed" = "加载英文翻译文件失败: %v"
+"i18n.en_load_success" = "加载外部英文翻译文件成功: %s"
+"i18n.zh_load_failed" = "加载中文翻译文件失败: %v"
+"i18n.zh_load_success" = "加载外部中文翻译文件成功: %s"
+"i18n.init_failed" = "初始化国际化支持失败: %v" 
