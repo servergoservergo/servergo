@@ -76,7 +76,7 @@ var configListCmd = &cobra.Command{
 		t.SetStyle(table.StyleColoredBright)
 
 		// 设置表头
-		t.AppendHeader(table.Row{i18n.T("config.item"), i18n.T("config.current_value"), i18n.T("config.description")})
+		UpdateConfigTableHeaders(t)
 
 		// 添加配置信息行
 		t.AppendRows([]table.Row{
@@ -105,44 +105,44 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 	var msg strings.Builder
 
 	if cmdName == "get" {
-		msg.WriteString("缺少参数：请提供一个配置项名称\n\n")
+		msg.WriteString(i18n.T("cmd.get.missing_arg") + "\n\n")
 	} else if cmdName == "set" {
 		if len(args) == 0 {
-			msg.WriteString("缺少参数：请提供配置项名称和值\n\n")
+			msg.WriteString(i18n.T("cmd.set.missing_key_value") + "\n\n")
 		} else {
-			msg.WriteString("缺少参数：请提供配置项的值\n\n")
+			msg.WriteString(i18n.T("cmd.set.missing_value") + "\n\n")
 		}
 	}
 
-	msg.WriteString("可用的配置项:\n")
+	msg.WriteString(i18n.T("cmd.available_items") + "\n")
 	for _, key := range validConfigKeys {
 		fmt.Fprintf(&msg, "  - %s\n", key)
 	}
 
-	msg.WriteString("\n使用说明:\n")
+	msg.WriteString("\n" + i18n.T("cmd.usage") + "\n")
 	if cmdName == "get" {
-		msg.WriteString("  servergo config get <配置项>\n\n")
-		msg.WriteString("示例:\n")
-		msg.WriteString("  servergo config get auto-open\n")
-		msg.WriteString("  servergo config get theme\n")
-		msg.WriteString("  servergo config get enable-dir-listing\n")
-		msg.WriteString("  servergo config get language\n")
+		msg.WriteString("  " + i18n.T("cmd.get.usage") + "\n\n")
+		msg.WriteString(i18n.T("cmd.examples") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.get.example1") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.get.example2") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.get.example3") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.get.example4") + "\n")
 	} else if cmdName == "set" {
-		msg.WriteString("  servergo config set <配置项> <值>\n\n")
-		msg.WriteString("示例:\n")
-		msg.WriteString("  servergo config set auto-open false       # 关闭自动打开浏览器\n")
-		msg.WriteString("  servergo config set theme dark            # 设置暗色主题\n")
-		msg.WriteString("  servergo config set enable-dir-listing true   # 启用目录列表\n")
-		msg.WriteString("  servergo config set language zh-CN        # 设置为中文界面\n")
+		msg.WriteString("  " + i18n.T("cmd.set.usage") + "\n\n")
+		msg.WriteString(i18n.T("cmd.examples") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.set.example1") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.set.example2") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.set.example3") + "\n")
+		msg.WriteString("  " + i18n.T("cmd.set.example4") + "\n")
 
 		if len(args) == 1 {
-			msg.WriteString("\n您提供的配置项: " + args[0] + "\n")
+			msg.WriteString("\n" + i18n.T("cmd.provided_item") + args[0] + "\n")
 			if args[0] == "theme" {
-				msg.WriteString("可选主题: default, dark, blue, green, retro, json, table\n")
+				msg.WriteString(i18n.T("cmd.theme.options") + "\n")
 			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" {
-				msg.WriteString("可接受的布尔值: true/false, yes/no, 1/0\n")
+				msg.WriteString(i18n.T("cmd.bool.options") + "\n")
 			} else if args[0] == "language" {
-				msg.WriteString("可选语言: en, zh-CN\n")
+				msg.WriteString(i18n.T("cmd.language.options") + "\n")
 			}
 		}
 	}
@@ -179,7 +179,7 @@ var configGetCmd = &cobra.Command{
 		// 获取配置值
 		value := viper.Get(key)
 		if value == nil {
-			return fmt.Errorf("配置项 '%s' 不存在", key)
+			return fmt.Errorf(i18n.Tf("error.config_item_not_exist", key))
 		}
 
 		// 直接输出原始值，不做格式转换
@@ -225,7 +225,7 @@ var configSetCmd = &cobra.Command{
 
 		// 保存配置
 		if err := config.SaveConfig(cfg); err != nil {
-			return fmt.Errorf("无法保存配置: %v", err)
+			return fmt.Errorf(i18n.Tf("error.cannot_save_config", err))
 		}
 
 		// 特殊处理语言变化的消息
@@ -236,6 +236,9 @@ var configSetCmd = &cobra.Command{
 
 			// 重新初始化命令描述
 			UpdateCommandDescriptions()
+
+			// 语言改变后，也需要重新加载表格表头的翻译
+			// 这里不需要显式操作，因为表头是在每次configListCmd运行时创建的
 
 			languageDisplayName := i18n.GetLanguageDisplayName(value)
 			logger.Info(i18n.Tf("config.language_changed", languageDisplayName))
@@ -259,20 +262,25 @@ func isValidConfigKey(key string) bool {
 
 // 生成无效key的友好错误信息
 func generateInvalidKeyError(key string) error {
-	errorMsg := fmt.Sprintf("不支持的配置项: '%s'\n\n支持的配置项有:\n", key)
+	var msg strings.Builder
+
+	// 不支持的配置项
+	fmt.Fprintf(&msg, "%s\n\n", i18n.Tf("error.invalid_config_key", key))
+
+	// 支持的配置项列表
+	msg.WriteString(i18n.T("error.available_keys") + "\n")
 	for _, validKey := range validConfigKeys {
-		errorMsg += fmt.Sprintf("  - %s\n", validKey)
+		fmt.Fprintf(&msg, "  - %s\n", validKey)
 	}
 
 	// 添加配置项说明
-	errorMsg += "\n配置项说明:\n"
-	errorMsg += "  - auto-open: 启动服务器后是否自动打开浏览器，可接受的值: true/false, yes/no, 1/0\n"
-	errorMsg += "  - enable-dir-listing: 是否启用目录列表功能，可接受的值: true/false, yes/no, 1/0\n"
-	errorMsg += "  - theme: 目录列表主题，可接受的值: default, dark, blue, green, retro, json, table\n"
-	errorMsg += "  - language: 界面语言，可接受的值: en, zh-CN\n"
-	// 添加其他配置项的说明...
+	msg.WriteString("\n" + i18n.T("error.key_descriptions") + "\n")
+	msg.WriteString("  - " + i18n.T("error.auto_open_desc") + "\n")
+	msg.WriteString("  - " + i18n.T("error.enable_dir_listing_desc") + "\n")
+	msg.WriteString("  - " + i18n.T("error.theme_desc") + "\n")
+	msg.WriteString("  - " + i18n.T("error.language_desc") + "\n")
 
-	return fmt.Errorf(errorMsg)
+	return fmt.Errorf(msg.String())
 }
 
 // 将字符串转换为布尔值，支持多种表示形式
@@ -286,7 +294,7 @@ func parseBoolValue(value string) (bool, error) {
 	case "false", "no", "n", "0", "off":
 		return false, nil
 	default:
-		return false, fmt.Errorf("无法解析为布尔值，支持的值: true/false, yes/no, y/n, 1/0, on/off")
+		return false, fmt.Errorf(i18n.T("error.invalid_bool"))
 	}
 }
 
@@ -312,7 +320,7 @@ func setConfigValue(key, value string) error {
 			}
 		}
 		if !isValid {
-			return fmt.Errorf("无效的主题名称: %s\n支持的主题有: default, dark, blue, green, retro, json, table", value)
+			return fmt.Errorf(i18n.Tf("error.invalid_theme", value))
 		}
 		viper.Set(key, value)
 
@@ -320,18 +328,18 @@ func setConfigValue(key, value string) error {
 		// 验证语言是否被支持
 		if !i18n.IsSupportedLanguage(value) {
 			supportedLangs := strings.Join(i18n.GetSupportedLanguages(), ", ")
-			return fmt.Errorf("不支持的语言: %s\n支持的语言有: %s", value, supportedLangs)
+			return fmt.Errorf(i18n.Tf("error.invalid_language", value, supportedLangs))
 		}
 		viper.Set(key, value)
 
 		// 语言设置特殊处理：同时更新i18n包的语言设置
 		if err := config.SetLanguage(value); err != nil {
-			return fmt.Errorf("无法设置语言: %v", err)
+			return fmt.Errorf(i18n.Tf("error.cannot_set_language", err))
 		}
 
 	default:
 		// 这里不应该到达，因为已经在前面验证了key的有效性
-		return fmt.Errorf("未知的配置项: %s", key)
+		return fmt.Errorf(i18n.Tf("error.unknown_config_item", key))
 	}
 
 	return nil
@@ -348,6 +356,12 @@ func formatBoolValue(value bool) string {
 // 格式化语言值，显示友好的语言名称
 func formatLanguageValue(lang string) string {
 	return i18n.GetLanguageDisplayName(lang)
+}
+
+// UpdateConfigTableHeaders 更新配置表格的表头为当前语言
+func UpdateConfigTableHeaders(t table.Writer) {
+	t.ResetHeaders()
+	t.AppendHeader(table.Row{i18n.T("config.item"), i18n.T("config.current_value"), i18n.T("config.description")})
 }
 
 func init() {
