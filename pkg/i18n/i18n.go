@@ -11,12 +11,20 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
+)
+
+// 环境变量名称，用于设置语言
+const (
+	// EnvLanguage 环境变量名称，用于指定应用程序语言
+	// 例如：SERVERGO_LANGUAGE=zh-CN
+	EnvLanguage = "SERVERGO_LANGUAGE"
 )
 
 // 支持的语言常量定义
@@ -75,8 +83,15 @@ var (
 // 2. 加载嵌入的翻译文件
 // 3. 创建指定语言的本地化器
 //
+// 语言优先级:
+// 1. 用户指定的语言参数
+// 2. 环境变量中的语言设置 (SERVERGO_LANGUAGE)
+// 3. 配置文件中的语言设置
+// 4. 操作系统检测的语言
+// 5. 最后才使用默认语言(英语)
+//
 // 参数:
-//   - lang: 要初始化的语言代码，如"en"或"zh-CN"，如为空则自动检测系统语言
+//   - lang: 要初始化的语言代码，如"en"或"zh-CN"，如为空则按优先级自动选择语言
 //
 // 返回:
 //   - 成功时返回nil，失败时返回对应的错误
@@ -84,15 +99,33 @@ var (
 // 示例:
 //
 //	err := i18n.Init("zh-CN") // 初始化为中文
-//	err := i18n.Init("") // 使用系统语言初始化，如系统语言不支持则使用默认语言
+//	err := i18n.Init("") // 按优先级自动选择语言
 func Init(lang string) error {
 	// 防止并发初始化
 	initMutex.Lock()
 	defer initMutex.Unlock()
 
-	// 如果语言未指定，先尝试检测操作系统语言
+	// 语言选择优先级:
+	// 1. 用户指定的语言参数
+	// 2. 环境变量中的语言设置 (SERVERGO_LANGUAGE)
+	// 3. 配置文件中的语言设置
+	// 4. 操作系统检测的语言
 	if lang == "" {
-		lang = DetectOSLanguage()
+		// 检查环境变量
+		envLang := os.Getenv(EnvLanguage)
+		if envLang != "" && IsSupportedLanguage(envLang) {
+			lang = envLang
+		} else {
+			// 从配置文件获取语言设置
+			configLang := getConfigLanguage()
+			if configLang != "" && IsSupportedLanguage(configLang) {
+				// 使用配置文件中的语言
+				lang = configLang
+			} else {
+				// 配置文件中没有有效的语言设置，使用系统语言
+				lang = DetectOSLanguage()
+			}
+		}
 	}
 
 	// 验证语言是否受支持
@@ -122,6 +155,57 @@ func Init(lang string) error {
 	loaded = true
 
 	return nil
+}
+
+// getConfigLanguage 尝试从配置中获取语言设置
+// 为避免循环依赖，不直接导入config包，而是通过动态获取
+func getConfigLanguage() string {
+	// 尝试读取配置文件中的语言设置
+	configLang := readLanguageFromConfigFile()
+	if configLang != "" {
+		return configLang
+	}
+
+	return ""
+}
+
+// readLanguageFromConfigFile 尝试直接读取配置文件中的语言设置
+// 这是一个临时解决方案，避免循环依赖
+func readLanguageFromConfigFile() string {
+	// 尝试获取用户主目录
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	// 构建配置文件路径 (与config包中的路径构建保持一致)
+	configDir := filepath.Join(homeDir, ".servergo")
+	configFile := filepath.Join(configDir, "config.yaml")
+
+	// 检查文件是否存在
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return ""
+	}
+
+	// 读取并解析配置文件
+	// 注意：这里使用了一个简单的方法来解析YAML，实际情况可能需要更复杂的逻辑
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		return ""
+	}
+
+	// 尝试提取language字段
+	// 这里使用一个简单的方法，实际可能需要更复杂的解析
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "language:") {
+			langValue := strings.TrimSpace(strings.TrimPrefix(line, "language:"))
+			return langValue
+		}
+	}
+
+	return ""
 }
 
 // GetCurrentLanguage 返回当前设置的语言代码
