@@ -37,15 +37,11 @@ func init() {
 
 // Execute 添加所有子命令到根命令并执行
 func Execute() {
-	// 将在init函数中执行
-	cobra.OnInitialize(func() {
-		// 所有命令已经注册后执行
-		if len(os.Args) == 1 {
-			// 如果没有提供子命令，则使用start运行
-			args := append([]string{"start"}, os.Args[1:]...)
-			RootCmd.SetArgs(args)
-		}
-	})
+	// 如果没有提供子命令，则修改参数列表，使其包含 "start" 子命令
+	if len(os.Args) == 1 {
+		os.Args = append(os.Args, "start")
+		logger.Debug("未指定子命令，默认运行start命令")
+	}
 
 	if err := RootCmd.Execute(); err != nil {
 		logger.Error("执行命令时发生错误: %v", err)
