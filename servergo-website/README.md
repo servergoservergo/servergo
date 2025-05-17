@@ -1,54 +1,57 @@
-# React + TypeScript + Vite
+# ServerGo 官方网站
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+这是 ServerGo 项目的官方网站代码库。ServerGo 是一个轻量级、高性能、易用的静态文件服务器，使用 Go 语言开发。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 18
+- TypeScript
+- Vite
+- React Router
+- React Icons
 
-## Expanding the ESLint configuration
+## 开发指南
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 安装依赖
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 启动开发服务器
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run dev
 ```
+
+这将在 [http://localhost:3000](http://localhost:3000) 启动开发服务器。
+
+### 构建生产版本
+
+```bash
+npm run build
+```
+
+构建后的文件将位于 `dist` 目录中。
+
+### 预览构建结果
+
+```bash
+npm run preview
+```
+
+## 代码结构
+
+- `src/assets` - 静态资源文件
+- `src/components` - 可复用组件
+- `src/pages` - 页面组件
+- `src/styles` - 全局样式
+- `public` - 公共资源文件
+
+## 部署
+
+构建后的网站是一个静态网站，可以部署到任何静态网站托管服务，如 GitHub Pages, Netlify, Vercel 等。
+
+## License
+
+[MIT](LICENSE)
