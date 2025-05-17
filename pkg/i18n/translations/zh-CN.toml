@@ -86,7 +86,7 @@
 "error.enable_dir_listing_desc" = "enable-dir-listing: 是否启用目录列表功能，可接受的值: true/false, yes/no, 1/0"
 "error.theme_desc" = "theme: 目录列表主题，请使用 --help 查看支持的主题列表"
 "error.language_desc" = "language: 界面语言，可接受的值: en, zh-CN"
-"error.invalid_bool" = "无法解析为布尔值，支持的值: true/false, yes/no, y/n, 1/0, on/off"
+"error.invalid_bool" = "输入的值无效。支持的值包括：true/false（真/假）、yes/no（是/否）、y/n、1/0、on/off（开/关）"
 "error.invalid_theme" = "无效的主题名称: %s\n支持的主题有: %s"
 "error.invalid_language" = "不支持的语言: %s\n支持的语言有: %s"
 "error.unknown_config_item" = "未知的配置项: %s"
@@ -225,4 +225,8 @@
 "login.footer" = "ServerGo 文件服务器"
 "login.error.credentials" = "用户名或密码不正确"
 "login.error.empty_fields" = "请输入用户名和密码"
-"login.error.server" = "无法加载登录页面" 
+"login.error.server" = "无法加载登录页面"
+
+# 配置项描述
+"config.enable_log_persistence_desc" = "是否将日志保存到本地文件"
+"error.enable_log_persistence_desc" = "是否将日志保存到本地文件（默认启用）" 

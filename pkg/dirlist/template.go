@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"strings"
 
+	"github.com/CC11001100/servergo/pkg/github"
 	"github.com/CC11001100/servergo/pkg/i18n"
 )
 
@@ -30,6 +31,8 @@ type TemplateData struct {
 	Items       []FileItem // 文件/目录列表
 	ParentDir   string     // 上级目录路径
 	CurrentTime string     // 当前时间
+	RepoURL     string     // GitHub仓库URL
+	Stars       int        // GitHub Star数量
 }
 
 // 文件或目录项
@@ -136,6 +139,12 @@ func NewDirListTemplate(theme string) (*DirListTemplate, error) {
 
 // Render 渲染目录列表模板
 func (t *DirListTemplate) Render(data TemplateData) (string, error) {
+	// 获取GitHub统计信息
+	if stats, err := github.GetStats(); err == nil {
+		data.Stars = stats.Stars
+	}
+	data.RepoURL = github.GetRepoURL()
+
 	// 对于特殊主题，使用特殊处理方式
 	switch t.theme {
 	case JsonTheme:
@@ -242,6 +251,9 @@ func (t *DirListTemplate) GetContentType() string {
 // GetStaticAssets 获取静态资源文件系统
 func GetStaticAssets() fs.FS {
 	// 从嵌入式文件系统中获取静态资源
-	subFS, _ := fs.Sub(templatesFS, "templates")
+	subFS, err := fs.Sub(templatesFS, "templates")
+	if err != nil {
+		return templatesFS
+	}
 	return subFS
 }

@@ -237,4 +237,31 @@ a.dir {
     .size-col {
         width: 35%;
     }
+}
+
+/* GitHub Corner */
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%, 100% { transform: rotate(0); }
+    20%, 60% { transform: rotate(-25deg); }
+    40%, 80% { transform: rotate(10deg); }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none;
+    }
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+    }
+}
+
+/* Retro theme specific GitHub corner colors */
+.github-corner svg {
+    fill: #00ff00;
+    color: #000;
+    filter: brightness(0.8) contrast(1.2);
 } 

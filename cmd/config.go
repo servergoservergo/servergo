@@ -19,10 +19,11 @@ import (
 
 // 支持的配置键列表
 var validConfigKeys = []string{
-	"auto-open",          // 是否自动打开浏览器
-	"enable-dir-listing", // 是否启用目录列表功能
-	"theme",              // 目录列表主题
-	"language",           // 界面语言
+	"auto-open",              // 是否自动打开浏览器
+	"enable-dir-listing",     // 是否启用目录列表功能
+	"theme",                  // 目录列表主题
+	"language",               // 界面语言
+	"enable-log-persistence", // 是否启用日志持久化
 	// 在这里添加其他支持的配置键
 }
 
@@ -93,6 +94,7 @@ var configListCmd = &cobra.Command{
 			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), i18n.T("config.enable_dir_listing_desc")},
 			{"theme", cfg.Theme, i18n.T("config.theme_desc")},
 			{"language", formatLanguageValue(cfg.Language), i18n.T("config.language_desc")},
+			{"enable-log-persistence", formatBoolValue(cfg.EnableLogPersistence), i18n.T("config.enable_log_persistence_desc")},
 		})
 
 		// 设置列对齐方式
@@ -150,7 +152,7 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 				// 使用全局定义的有效主题列表
 				themesStr := strings.Join(dirlist.GetSupportedThemes(), ", ")
 				msg.WriteString(i18n.T("cmd.theme.options") + themesStr + "\n")
-			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" {
+			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" || args[0] == "enable-log-persistence" {
 				msg.WriteString(i18n.T("cmd.bool.options") + "\n")
 			} else if args[0] == "language" {
 				// 使用语言模块提供的支持语言列表
@@ -234,7 +236,7 @@ var configSetCmd = &cobra.Command{
 					fmt.Println("  -", theme)
 				}
 				os.Exit(0)
-			case "auto-open", "enable-dir-listing":
+			case "auto-open", "enable-dir-listing", "enable-log-persistence":
 				fmt.Println(i18n.T("cmd.bool.options"))
 				fmt.Println("  - true, yes, y, 1, on")
 				fmt.Println("  - false, no, n, 0, off")
@@ -335,6 +337,7 @@ func generateInvalidKeyError(key string) error {
 	msg.WriteString("  - " + i18n.T("error.enable_dir_listing_desc") + "\n")
 	msg.WriteString("  - " + i18n.T("error.theme_desc") + "\n")
 	msg.WriteString("  - " + i18n.T("error.language_desc") + "\n")
+	msg.WriteString("  - " + i18n.T("error.enable_log_persistence_desc") + "\n")
 
 	return fmt.Errorf(msg.String())
 }
@@ -357,7 +360,7 @@ func parseBoolValue(value string) (bool, error) {
 // 设置配置值（根据类型转换）
 func setConfigValue(key, value string) error {
 	switch key {
-	case "auto-open", "enable-dir-listing":
+	case "auto-open", "enable-dir-listing", "enable-log-persistence":
 		// 将输入转换为布尔值
 		boolValue, err := parseBoolValue(value)
 		if err != nil {

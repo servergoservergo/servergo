@@ -99,6 +99,7 @@
 "error.load_translations" = "Failed to load translations: %v"
 "error.config_item_not_exist" = "Configuration item '%s' does not exist"
 "error.cannot_save_config" = "Cannot save configuration: %v"
+"error.enable_log_persistence_desc" = "Whether to save logs to local files (enabled by default)"
 
 # Command line error messages
 "errors.flag_needs_value" = "%s requires a %s value"
@@ -133,6 +134,7 @@
 "config.enabled" = "Enabled"
 "config.disabled" = "Disabled"
 "config.item_set" = "Configuration item '%s' has been set to '%s'"
+"config.enable_log_persistence_desc" = "Whether to save logs to local files"
 
 # Server related
 "server.starting" = "Starting file server at http://localhost:%d"
