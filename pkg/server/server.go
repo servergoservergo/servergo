@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,30 +16,60 @@ import (
 )
 
 // Config 保存文件服务器的配置
+// 该结构体包含了服务器启动和运行所需的所有配置参数
 type Config struct {
-	Port int    // 服务器监听的端口
-	Dir  string // 提供服务的目录路径
+	Port int    // 服务器监听的端口，例如: 8080
+	Dir  string // 提供服务的目录路径，例如: "/home/user/files"
+
 	// 认证相关配置
-	AuthType        auth.AuthType // 认证类型
-	Username        string        // 用户名
-	Password        string        // 密码
-	Token           string        // 令牌
-	EnableLoginPage bool          // 是否启用登录页面
+	AuthType        auth.AuthType // 认证类型，可选值: auth.NoAuth, auth.BasicAuth, auth.TokenAuth, auth.FormAuth
+	Username        string        // 用户名，用于BasicAuth和FormAuth，例如: "admin"
+	Password        string        // 密码，用于BasicAuth和FormAuth，例如: "password123"
+	Token           string        // 令牌，用于TokenAuth，例如: "abcdef123456"
+	EnableLoginPage bool          // 是否启用登录页面，用于FormAuth，例如: true表示启用
+
 	// 目录浏览相关配置
-	EnableDirListing bool   // 是否启用目录列表功能
-	Theme            string // 目录列表主题
+	EnableDirListing bool   // 是否启用目录列表功能，例如: true表示启用
+	Theme            string // 目录列表主题，可选值: "default", "bootstrap", "material" 等
 }
 
 // FileServer 表示一个文件服务器实例
+// 该结构体封装了服务器的所有状态和功能
 type FileServer struct {
-	config        Config
-	absDir        string
-	engine        *gin.Engine
-	authenticator auth.Authenticator
-	dirTemplate   *dirlist.DirListTemplate
+	config        Config                   // 服务器配置信息
+	absDir        string                   // 服务目录的绝对路径，例如: "/home/user/files"
+	engine        *gin.Engine              // Gin引擎实例，用于处理HTTP请求
+	authenticator auth.Authenticator       // 认证器实例，用于处理用户认证
+	dirTemplate   *dirlist.DirListTemplate // 目录列表模板，用于渲染目录页面
 }
 
 // New 创建一个新的文件服务器实例
+//
+// 参数:
+//   - config: 服务器配置，包含端口、目录、认证信息等
+//
+// 返回值:
+//   - *FileServer: 初始化好的文件服务器实例
+//   - error: 如有错误，返回对应错误信息，例如目录不存在或无法访问
+//
+// 使用示例:
+// ```
+//
+//	config := server.Config{
+//	    Port: 8080,
+//	    Dir: "./files",
+//	    AuthType: auth.NoAuth,
+//	    EnableDirListing: true,
+//	    Theme: "default",
+//	}
+//
+// srv, err := server.New(config)
+//
+//	if err != nil {
+//	    log.Fatalf("创建服务器失败: %v", err)
+//	}
+//
+// ```
 func New(config Config) (*FileServer, error) {
 	// 获取绝对路径
 	absDir, err := filepath.Abs(config.Dir)
@@ -98,6 +126,20 @@ func New(config Config) (*FileServer, error) {
 }
 
 // Start 启动文件服务器
+// 此方法会阻塞执行，直到服务器停止或出错
+//
+// 返回值:
+//   - error: 如果服务器启动失败，返回错误信息
+//
+// 使用示例:
+// ```
+// err := srv.Start()
+//
+//	if err != nil {
+//	    log.Fatalf("服务器启动失败: %v", err)
+//	}
+//
+// ```
 func (fs *FileServer) Start() error {
 	// 如果是表单认证并且启用了登录页面，设置表单认证的路由
 	if fs.authenticator.AuthType() == auth.FormAuth && fs.authenticator.LoginPageEnabled() {
@@ -129,6 +171,7 @@ func (fs *FileServer) Start() error {
 	})
 
 	// 提供模板静态资源，使用特定路由前缀
+	// /_servergo_assets 路径下的资源会被提供给客户端，如CSS、JS文件
 	staticFS := dirlist.GetStaticAssets()
 	fs.engine.StaticFS("/_servergo_assets", http.FS(staticFS))
 
@@ -169,166 +212,15 @@ func (fs *FileServer) Start() error {
 }
 
 // GetAbsDir 获取文件服务器的绝对路径
+//
+// 返回值:
+//   - string: 服务器提供服务的目录绝对路径
+//
+// 使用示例:
+// ```
+// absPath := srv.GetAbsDir()
+// fmt.Printf("服务器的绝对路径: %s\n", absPath)
+// ```
 func (fs *FileServer) GetAbsDir() string {
 	return fs.absDir
-}
-
-// handleFileRequest 处理文件请求
-func (fs *FileServer) handleFileRequest(c *gin.Context) {
-	// 获取请求路径
-	reqPath := c.Request.URL.Path
-
-	// 如果请求的是内部静态资源，跳过处理
-	if strings.HasPrefix(reqPath, "/_servergo_assets/") {
-		c.Next()
-		return
-	}
-
-	// 处理路径中可能的URL编码
-	reqPath = strings.Replace(reqPath, "%20", " ", -1)
-
-	// 确保路径不会超出根目录
-	cleanPath := filepath.Clean(reqPath)
-	if !strings.HasPrefix(cleanPath, "/") {
-		cleanPath = "/" + cleanPath
-	}
-
-	// 将请求路径转换为服务器文件系统上的实际路径
-	fullPath := filepath.Join(fs.absDir, cleanPath)
-
-	// 获取文件状态
-	fileInfo, err := os.Stat(fullPath)
-	if err != nil {
-		// 文件不存在，返回404
-		c.String(http.StatusNotFound, "404 Not Found: %s", reqPath)
-		return
-	}
-
-	// 如果是目录，检查是否启用了目录列表功能
-	if fileInfo.IsDir() {
-		// 检查该目录下是否有index.html文件
-		indexPath := filepath.Join(fullPath, "index.html")
-		if _, err := os.Stat(indexPath); err == nil {
-			// 如果存在index.html，则提供该文件
-			c.File(indexPath)
-			return
-		}
-
-		// 如果启用了目录列表功能，则显示目录内容
-		if fs.config.EnableDirListing {
-			fs.renderDirectoryListing(c, fullPath, reqPath)
-			return
-		}
-
-		// 未启用目录列表功能，返回403禁止访问
-		c.String(http.StatusForbidden, "403 Forbidden: Directory listing disabled")
-		return
-	}
-
-	// 如果是文件，则提供该文件
-	c.File(fullPath)
-}
-
-// renderDirectoryListing 渲染目录列表页面
-func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath string) {
-	// 读取目录内容
-	files, err := os.ReadDir(fullPath)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to read directory content: %v", err)
-		return
-	}
-
-	// 创建文件项列表
-	items := make([]dirlist.FileItem, 0, len(files))
-	for _, file := range files {
-		info, err := file.Info()
-		if err != nil {
-			continue
-		}
-
-		// 构建文件路径
-		itemPath := filepath.Join(reqPath, file.Name())
-		if !strings.HasPrefix(itemPath, "/") {
-			itemPath = "/" + itemPath
-		}
-
-		// 格式化大小
-		var sizeStr string
-		var sizeBytes int64
-		if file.IsDir() {
-			sizeStr = "-"
-			sizeBytes = 0
-		} else {
-			sizeBytes = info.Size()
-			sizeStr = formatSize(sizeBytes)
-		}
-
-		// 添加到列表
-		items = append(items, dirlist.FileItem{
-			Name:         file.Name(),
-			IsDir:        file.IsDir(),
-			Size:         sizeStr,
-			SizeBytes:    sizeBytes,
-			LastModified: info.ModTime().Format("2006-01-02 15:04:05"),
-			Path:         itemPath,
-		})
-	}
-
-	// 按照目录在前，文件在后的方式排序
-	sort.Slice(items, func(i, j int) bool {
-		// 如果一个是目录一个不是，目录在前
-		if items[i].IsDir != items[j].IsDir {
-			return items[i].IsDir
-		}
-		// 否则按名称字母顺序排序
-		return items[i].Name < items[j].Name
-	})
-
-	// 计算上级目录路径
-	var parentDir string
-	if reqPath != "/" {
-		parentDir = filepath.Dir(reqPath)
-		if parentDir == "." {
-			parentDir = "/"
-		}
-		if !strings.HasPrefix(parentDir, "/") {
-			parentDir = "/" + parentDir
-		}
-		if parentDir != "/" && strings.HasSuffix(parentDir, "/") {
-			parentDir = parentDir[:len(parentDir)-1]
-		}
-	}
-
-	// 准备模板数据
-	data := dirlist.TemplateData{
-		DirPath:     reqPath,
-		Items:       items,
-		ParentDir:   parentDir,
-		CurrentTime: time.Now().Format("2006-01-02 15:04:05"),
-	}
-
-	// 渲染模板
-	html, err := fs.dirTemplate.Render(data)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Template rendering error: %v", err)
-		return
-	}
-
-	// 使用模板提供的内容类型，支持HTML和JSON格式
-	c.Header("Content-Type", fs.dirTemplate.GetContentType())
-	c.String(http.StatusOK, html)
-}
-
-// formatSize 格式化文件大小
-func formatSize(size int64) string {
-	const unit = 1024
-	if size < unit {
-		return fmt.Sprintf("%d B", size)
-	}
-	div, exp := int64(unit), 0
-	for n := size / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "KMGTPE"[exp])
 }
