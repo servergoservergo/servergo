@@ -52,7 +52,7 @@ func Execute() {
 	// 如果没有提供子命令，则修改参数列表，使其包含 "start" 子命令
 	if len(os.Args) == 1 {
 		os.Args = append(os.Args, "start")
-		logger.Debug("未指定子命令，默认运行start命令")
+		logger.Debug(i18n.T("cmd.default_start"))
 	}
 
 	// 更新所有命令的描述为当前语言
@@ -66,7 +66,7 @@ func Execute() {
 	err := RootCmd.Execute()
 	if err != nil {
 		// 使用fmt直接打印错误到标准错误输出，不使用logger避免日期前缀等
-		fmt.Fprintln(os.Stderr, "Error:", err)
+		fmt.Fprintln(os.Stderr, i18n.T("error.prefix"), err)
 		os.Exit(1)
 	}
 }

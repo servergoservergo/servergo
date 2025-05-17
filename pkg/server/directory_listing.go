@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/CC11001100/servergo/pkg/dirlist"
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/utils"
 )
 
@@ -31,7 +32,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 读取目录内容
 	files, err := os.ReadDir(fullPath)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error reading directory: %v", err)
+		c.String(http.StatusInternalServerError, i18n.Tf("http.500_dir_content", err))
 		return
 	}
 
@@ -107,7 +108,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 渲染模板
 	html, err := fs.dirTemplate.Render(data)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Template rendering error: %v", err)
+		c.String(http.StatusInternalServerError, i18n.Tf("http.500_template", err))
 		return
 	}
 

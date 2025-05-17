@@ -75,16 +75,16 @@ func New(config Config) (*FileServer, error) {
 	// 获取绝对路径
 	absDir, err := filepath.Abs(config.Dir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path: %v", err)
+		return nil, fmt.Errorf(i18n.T("error.dir_not_exist"), config.Dir)
 	}
 
 	// 检查目录是否存在
 	info, err := os.Stat(absDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to access directory %s: %v", absDir, err)
+		return nil, fmt.Errorf(i18n.Tf("error.dir_not_exist", absDir))
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("%s is not a directory", absDir)
+		return nil, fmt.Errorf(i18n.Tf("error.not_a_directory", absDir))
 	}
 
 	// 设置Gin为生产模式，避免debug信息
@@ -114,7 +114,7 @@ func New(config Config) (*FileServer, error) {
 	// 创建目录列表模板
 	dirTemplate, err := dirlist.NewDirListTemplate(theme)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize directory listing template: %v", err)
+		return nil, fmt.Errorf(i18n.Tf("http.500_template", err))
 	}
 
 	return &FileServer{

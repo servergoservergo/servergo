@@ -51,6 +51,7 @@ func Init(lang string) error {
 
 	// 验证语言是否受支持
 	if !IsSupportedLanguage(lang) {
+		// 这里不能使用 i18n.T，因为 i18n 系统还未初始化
 		return fmt.Errorf("unsupported language: %s", lang)
 	}
 
@@ -61,6 +62,7 @@ func Init(lang string) error {
 	// 加载翻译文件
 	err := loadTranslations()
 	if err != nil {
+		// 这里不能使用 i18n.T，因为 i18n 系统还未初始化完成
 		return fmt.Errorf("failed to load translations: %v", err)
 	}
 
@@ -92,6 +94,7 @@ func GetCurrentLanguage() string {
 func SetLanguage(lang string) error {
 	// 检查语言是否受支持
 	if !IsSupportedLanguage(lang) {
+		// 此时 i18n 已经初始化，但为避免循环引用，不使用 i18n.T
 		return fmt.Errorf("language '%s' is not supported", lang)
 	}
 

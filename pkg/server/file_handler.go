@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,7 +49,7 @@ func (fs *FileServer) handleFileRequest(c *gin.Context) {
 	fileInfo, err := os.Stat(fullPath)
 	if err != nil {
 		// 文件不存在，返回404
-		c.String(http.StatusNotFound, "404 Not Found: %s", reqPath)
+		c.String(http.StatusNotFound, i18n.Tf("http.404", reqPath))
 		return
 	}
 
@@ -69,7 +70,7 @@ func (fs *FileServer) handleFileRequest(c *gin.Context) {
 		}
 
 		// 未启用目录列表功能，返回403禁止访问
-		c.String(http.StatusForbidden, "403 Forbidden: Directory listing disabled")
+		c.String(http.StatusForbidden, i18n.T("http.403"))
 		return
 	}
 

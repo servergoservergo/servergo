@@ -128,6 +128,8 @@ func SaveConfig(cfg Config) error {
 func SetLanguage(lang string) error {
 	// 验证语言是否支持
 	if !i18n.IsSupportedLanguage(lang) {
+		// 注意：这里不使用 i18n.T 是为了避免在语言设置出错时可能导致的循环依赖
+		// 由于这个错误消息主要是内部使用，保持简单的英文错误即可
 		return fmt.Errorf("language '%s' is not supported", lang)
 	}
 

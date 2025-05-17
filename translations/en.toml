@@ -81,6 +81,13 @@
 "error.invalid_language" = "Unsupported language: %s\nSupported languages: %s"
 "error.unknown_config_item" = "Unknown configuration item: %s"
 "error.cannot_set_language" = "Cannot set language: %v"
+"error.home_dir" = "Failed to get home directory: %v"
+"error.config_dir_create" = "Failed to create config directory: %v"
+"error.config_file_create" = "Failed to create config file: %v"
+"error.config_file_write" = "Failed to write config file: %v"
+"error.unsupported_language" = "Unsupported language: %s"
+"error.load_translations" = "Failed to load translations: %v"
+"error.prefix" = "Error:"
 
 # Configuration
 "config.auto_open" = "Auto open browser"
