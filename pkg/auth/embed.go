@@ -2,8 +2,12 @@ package auth
 
 import (
 	"embed"
+	"html/template"
 	"io/fs"
 	"net/http"
+	"strings"
+
+	"github.com/CC11001100/servergo/pkg/i18n"
 )
 
 //go:embed web
@@ -35,7 +39,56 @@ func GetFileContent(filename string) (string, error) {
 	return string(content), nil
 }
 
+// LoginPageData 登录页面的数据结构
+type LoginPageData struct {
+	Lang             string
+	Title            string
+	Header           string
+	Subheader        string
+	UsernameLabel    string
+	PasswordLabel    string
+	ButtonText       string
+	Footer           string
+	ErrorEmptyFields string
+	ErrorCredentials string
+}
+
 // GetLoginHTMLContent 获取登录页面的HTML内容
 func GetLoginHTMLContent() (string, error) {
-	return GetFileContent("login.html")
+	// 获取当前语言
+	currentLang := i18n.GetCurrentLanguage()
+
+	// 读取登录页面模板
+	htmlContent, err := GetFileContent("login.html")
+	if err != nil {
+		return "", err
+	}
+
+	// 创建模板
+	tmpl, err := template.New("login").Parse(htmlContent)
+	if err != nil {
+		return "", err
+	}
+
+	// 准备模板数据
+	data := LoginPageData{
+		Lang:             currentLang,
+		Title:            i18n.T("login.title"),
+		Header:           i18n.T("login.header"),
+		Subheader:        i18n.T("login.subheader"),
+		UsernameLabel:    i18n.T("login.username"),
+		PasswordLabel:    i18n.T("login.password"),
+		ButtonText:       i18n.T("login.button"),
+		Footer:           i18n.T("login.footer"),
+		ErrorEmptyFields: i18n.T("login.error.empty_fields"),
+		ErrorCredentials: i18n.T("login.error.credentials"),
+	}
+
+	// 渲染模板
+	var buf strings.Builder
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }

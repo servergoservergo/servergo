@@ -22,10 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         
+        // 获取国际化的错误消息
+        const errorEmptyFields = window.loginErrorMessages.emptyFields;
+        
         // 简单的客户端验证
         if (!username || !password) {
             event.preventDefault();
-            errorMessage.textContent = '请输入用户名和密码';
+            errorMessage.textContent = errorEmptyFields;
             errorMessage.style.display = 'block';
             return;
         }

@@ -192,4 +192,16 @@
 "cmd.bool.options" = "Accepted boolean values: true/false, yes/no, 1/0"
 "cmd.language.options" = "Available languages: en, zh-CN"
 "error.config_item_not_exist" = "Configuration item '%s' does not exist"
-"error.cannot_save_config" = "Cannot save configuration: %v" 
+"error.cannot_save_config" = "Cannot save configuration: %v"
+
+# Auth login page
+"login.title" = "ServerGo - Login"
+"login.header" = "ServerGo File Server"
+"login.subheader" = "Secure access to your files"
+"login.username" = "Username"
+"login.password" = "Password"
+"login.button" = "Login"
+"login.footer" = "ServerGo File Server"
+"login.error.credentials" = "Incorrect username or password"
+"login.error.empty_fields" = "Please enter username and password"
+"login.error.server" = "Failed to load login page" 

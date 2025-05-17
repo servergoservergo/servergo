@@ -192,4 +192,16 @@
 "format.size_kb" = "KB"
 "format.size_mb" = "MB"
 "format.size_gb" = "GB"
-"format.size_tb" = "TB" 
+"format.size_tb" = "TB"
+
+# Auth login page
+"login.title" = "ServerGo - 登录"
+"login.header" = "ServerGo 文件服务器"
+"login.subheader" = "安全访问您的文件"
+"login.username" = "用户名"
+"login.password" = "密码"
+"login.button" = "登录"
+"login.footer" = "ServerGo 文件服务器"
+"login.error.credentials" = "用户名或密码不正确"
+"login.error.empty_fields" = "请输入用户名和密码"
+"login.error.server" = "无法加载登录页面" 

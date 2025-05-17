@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +42,7 @@ func (a *FormAuthenticator) Middleware() gin.HandlerFunc {
 				// 获取登录页面HTML
 				loginHTML, err := GetLoginHTMLContent()
 				if err != nil {
-					c.String(http.StatusInternalServerError, "无法加载登录页面")
+					c.String(http.StatusInternalServerError, i18n.T("login.error.server"))
 					c.Abort()
 					return
 				}
@@ -65,7 +66,7 @@ func (a *FormAuthenticator) Middleware() gin.HandlerFunc {
 					return
 				} else {
 					// 验证失败，重定向到登录页面并显示错误
-					errorMsg := "用户名或密码不正确"
+					errorMsg := i18n.T("login.error.credentials")
 					c.Redirect(http.StatusFound, fmt.Sprintf("/auth/login?error=%s", errorMsg))
 					c.Abort()
 					return
