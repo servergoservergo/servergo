@@ -90,8 +90,31 @@ func SaveConfig(cfg Config) error {
 	viper.Set("theme", cfg.Theme)
 	// 其他配置项设置...
 
+	// 获取配置目录
+	configDir, err := getConfigDir()
+	if err != nil {
+		return fmt.Errorf("无法获取配置目录: %v", err)
+	}
+
+	// 获取配置文件路径
+	configPath := filepath.Join(configDir, ConfigFileName+"."+ConfigFileType)
+
+	// 检查配置文件是否存在，如果不存在则创建一个空的配置文件
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// 创建空配置文件
+		file, err := os.Create(configPath)
+		if err != nil {
+			return fmt.Errorf("无法创建配置文件: %v", err)
+		}
+		file.Close()
+	}
+
 	// 保存配置到文件
-	return viper.WriteConfig()
+	if err := viper.WriteConfigAs(configPath); err != nil {
+		return fmt.Errorf("无法写入配置文件: %v", err)
+	}
+
+	return nil
 }
 
 // 设置默认配置

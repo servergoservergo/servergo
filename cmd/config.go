@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/CC11001100/servergo/pkg/config"
 	"github.com/CC11001100/servergo/pkg/logger"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -50,14 +53,48 @@ var configListCmd = &cobra.Command{
 			return err
 		}
 
-		// 显示配置信息
-		logger.Info("当前配置:")
-		logger.Info("====================")
-		logger.Info("配置文件路径: %s", cfgPath)
-		logger.Info("---")
-		logger.Info("auto-open = %t", cfg.AutoOpen)
-		logger.Info("enable-dir-listing = %t", cfg.EnableDirListing)
-		// 其他配置项...
+		// 检查配置文件是否实际存在
+		fileExists := false
+		if _, err := os.Stat(cfgPath); err == nil {
+			fileExists = true
+		}
+
+		// 先单独显示配置文件路径信息
+		logger.Info("ServerGo 当前配置")
+		if fileExists {
+			logger.Info("配置文件路径: %s", cfgPath)
+		} else {
+			logger.Info("配置文件尚未创建，当前使用默认配置")
+			logger.Info("默认配置文件路径将为: %s", cfgPath)
+		}
+		logger.Info("")
+
+		// 创建表格
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+
+		// 设置表格样式
+		t.SetStyle(table.StyleColoredBright)
+
+		// 设置表头
+		t.AppendHeader(table.Row{"配置项", "当前值", "说明"})
+
+		// 添加配置信息行
+		t.AppendRows([]table.Row{
+			{"auto-open", formatBoolValue(cfg.AutoOpen), "启动服务器后是否自动打开浏览器"},
+			{"enable-dir-listing", formatBoolValue(cfg.EnableDirListing), "是否启用目录列表功能"},
+			{"theme", cfg.Theme, "目录列表主题"},
+		})
+
+		// 设置列对齐方式
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, Align: text.AlignLeft, AlignHeader: text.AlignCenter, WidthMax: 30},
+			{Number: 2, Align: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 20},
+			{Number: 3, Align: text.AlignLeft, AlignHeader: text.AlignCenter},
+		})
+
+		// 输出表格
+		t.Render()
 
 		return nil
 	},
@@ -119,8 +156,11 @@ var configSetCmd = &cobra.Command{
 			return err
 		}
 
+		// 获取完整的配置对象
+		cfg := config.GetConfig()
+
 		// 保存配置
-		if err := viper.WriteConfig(); err != nil {
+		if err := config.SaveConfig(cfg); err != nil {
 			return fmt.Errorf("无法保存配置: %v", err)
 		}
 
@@ -187,6 +227,14 @@ func setConfigValue(key, value string) error {
 	}
 
 	return nil
+}
+
+// 格式化布尔值，使其更易读（添加颜色）
+func formatBoolValue(value bool) string {
+	if value {
+		return text.Colors{text.FgGreen, text.Bold}.Sprint("开启")
+	}
+	return text.Colors{text.FgRed}.Sprint("关闭")
 }
 
 func init() {

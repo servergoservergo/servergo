@@ -254,10 +254,13 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 
 		// 格式化大小
 		var sizeStr string
+		var sizeBytes int64
 		if file.IsDir() {
 			sizeStr = "-"
+			sizeBytes = 0
 		} else {
-			sizeStr = formatSize(info.Size())
+			sizeBytes = info.Size()
+			sizeStr = formatSize(sizeBytes)
 		}
 
 		// 添加到列表
@@ -265,6 +268,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 			Name:         file.Name(),
 			IsDir:        file.IsDir(),
 			Size:         sizeStr,
+			SizeBytes:    sizeBytes,
 			LastModified: info.ModTime().Format("2006-01-02 15:04:05"),
 			Path:         itemPath,
 		})
@@ -310,7 +314,8 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 		return
 	}
 
-	c.Header("Content-Type", "text/html; charset=utf-8")
+	// 使用模板提供的内容类型，支持HTML和JSON格式
+	c.Header("Content-Type", fs.dirTemplate.GetContentType())
 	c.String(http.StatusOK, html)
 }
 
