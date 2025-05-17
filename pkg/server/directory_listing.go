@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/CC11001100/servergo/pkg/dirlist"
+	"github.com/CC11001100/servergo/pkg/utils"
 )
 
 // renderDirectoryListing 渲染目录列表页面
@@ -30,7 +31,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 读取目录内容
 	files, err := os.ReadDir(fullPath)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to read directory content: %v", err)
+		c.String(http.StatusInternalServerError, "Error reading directory: %v", err)
 		return
 	}
 
@@ -56,7 +57,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 			sizeBytes = 0
 		} else {
 			sizeBytes = info.Size()
-			sizeStr = formatSize(sizeBytes)
+			sizeStr = utils.FormatSize(sizeBytes)
 		}
 
 		// 添加到列表

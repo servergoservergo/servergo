@@ -1,10 +1,10 @@
-package server
+package utils
 
 import (
 	"testing"
 )
 
-// TestFormatSize 测试formatSize函数在不同输入大小下的输出
+// TestFormatSize 测试FormatSize函数在不同输入大小下的输出
 func TestFormatSize(t *testing.T) {
 	// 定义测试用例
 	tests := []struct {
@@ -28,23 +28,23 @@ func TestFormatSize(t *testing.T) {
 	// 执行测试用例
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := formatSize(tt.size)
+			result := FormatSize(tt.size)
 			if result != tt.expected {
-				t.Errorf("formatSize(%d) = %s, 期望值 %s", tt.size, result, tt.expected)
+				t.Errorf("FormatSize(%d) = %s, 期望值 %s", tt.size, result, tt.expected)
 			}
 		})
 	}
 }
 
-// BenchmarkFormatSize 对formatSize函数进行基准测试
+// BenchmarkFormatSize 对FormatSize函数进行基准测试
 func BenchmarkFormatSize(b *testing.B) {
 	// 准备不同范围的大小值进行基准测试
 	sizes := []int64{0, 100, 1024, 1048576, 1073741824, 1099511627776}
 
 	for _, size := range sizes {
-		b.Run("Size-"+formatSize(size), func(b *testing.B) {
+		b.Run("Size-"+FormatSize(size), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				formatSize(size)
+				FormatSize(size)
 			}
 		})
 	}
