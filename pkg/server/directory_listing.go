@@ -85,15 +85,15 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 	// 计算上级目录路径
 	var parentDir string
 	if reqPath != "/" {
-		parentDir = filepath.Dir(reqPath)
+		// 如果路径以斜线结尾，先去掉结尾的斜线
+		cleanPath := strings.TrimSuffix(reqPath, "/")
+		// 获取父目录
+		parentDir = filepath.Dir(cleanPath)
 		if parentDir == "." {
 			parentDir = "/"
 		}
 		if !strings.HasPrefix(parentDir, "/") {
 			parentDir = "/" + parentDir
-		}
-		if parentDir != "/" && strings.HasSuffix(parentDir, "/") {
-			parentDir = parentDir[:len(parentDir)-1]
 		}
 	}
 
@@ -112,7 +112,7 @@ func (fs *FileServer) renderDirectoryListing(c *gin.Context, fullPath, reqPath s
 		return
 	}
 
-	// 使用模板提供的内容类型，支持HTML和JSON格式
+	// 设置正确的 Content-Type
 	c.Header("Content-Type", fs.dirTemplate.GetContentType())
 	c.String(http.StatusOK, html)
 }

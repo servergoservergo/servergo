@@ -208,13 +208,23 @@ func (fs *FileServer) Start() error {
 		logger.Info(i18n.T("auth.disabled"))
 	case auth.BasicAuth:
 		logger.Info(i18n.T("auth.basic_enabled"))
+		username, password := fs.authenticator.GetCredentials()
+		logger.Info("\033[1;32m认证信息:\033[0m")
+		logger.Info("\033[1;34m用户名:\033[0m \033[1;33m%s\033[0m", username)
+		logger.Info("\033[1;34m密  码:\033[0m \033[1;33m%s\033[0m", password)
 	case auth.TokenAuth:
 		logger.Info(i18n.T("auth.token_enabled"))
-		logger.Info(i18n.Tf("auth.token_access", fs.config.Token))
+		_, token := fs.authenticator.GetCredentials()
+		logger.Info(i18n.Tf("auth.token_access", token))
 	case auth.FormAuth:
 		logger.Info(i18n.T("auth.form_enabled"))
 		if fs.authenticator.LoginPageEnabled() {
 			logger.Info(i18n.T("auth.login_page_enabled"))
+			username, password := fs.authenticator.GetCredentials()
+			logger.Info("\033[1;32m认证信息:\033[0m")
+			logger.Info("\033[1;34m登录地址:\033[0m \033[1;36mhttp://localhost:%d/auth/login\033[0m", fs.config.Port)
+			logger.Info("\033[1;34m用户名:\033[0m \033[1;33m%s\033[0m", username)
+			logger.Info("\033[1;34m密  码:\033[0m \033[1;33m%s\033[0m", password)
 		}
 	}
 
