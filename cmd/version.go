@@ -3,14 +3,8 @@ package cmd
 import (
 	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
+	"github.com/CC11001100/servergo/pkg/version"
 	"github.com/spf13/cobra"
-)
-
-// 版本信息
-var (
-	Version   = "0.1.0"
-	BuildDate = "Unknown" // 默认英文，运行时会被翻译
-	GitCommit = "Unknown" // 默认英文，运行时会被翻译
 )
 
 // versionCmd 显示当前版本信息和项目信息
@@ -20,20 +14,23 @@ var versionCmd = &cobra.Command{
 	Long:  i18n.T("cmd.version.long"),
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取本地化的未知字符串
-		localizedBuildDate := BuildDate
-		localizedGitCommit := GitCommit
-		if BuildDate == "Unknown" {
-			localizedBuildDate = i18n.T("version.unknown_date")
+		localizedBuildTime := version.BuildTime
+		localizedGitCommit := version.GitCommit
+		if version.BuildTime == "unknown" {
+			localizedBuildTime = i18n.T("version.unknown_date")
 		}
-		if GitCommit == "Unknown" {
+		if version.GitCommit == "unknown" {
 			localizedGitCommit = i18n.T("version.unknown_commit")
 		}
 
 		logger.Info(i18n.T("version.title"))
 		logger.Info("==============")
-		logger.Info(i18n.Tf("version.version", Version))
-		logger.Info(i18n.Tf("version.build_date", localizedBuildDate))
+		logger.Info(i18n.Tf("version.version", version.Version))
+		logger.Info(i18n.Tf("version.build_date", localizedBuildTime))
 		logger.Info(i18n.Tf("version.git_commit", localizedGitCommit))
+		if version.GitRef != "unknown" {
+			logger.Info(i18n.Tf("version.git_ref", version.GitRef))
+		}
 		logger.Info("")
 		logger.Info(i18n.T("version.description_1"))
 		logger.Info(i18n.T("version.description_2"))

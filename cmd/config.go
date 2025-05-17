@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/dirlist"
 	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -24,6 +25,9 @@ var validConfigKeys = []string{
 	"language",           // 界面语言
 	// 在这里添加其他支持的配置键
 }
+
+// 使用dirlist包中定义的主题列表
+// 支持的主题列表在 pkg/dirlist/themes.go 中定义
 
 // configCmd 表示配置相关的命令
 var configCmd = &cobra.Command{
@@ -143,11 +147,15 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 		if len(args) == 1 {
 			msg.WriteString("\n" + i18n.T("cmd.provided_item") + args[0] + "\n")
 			if args[0] == "theme" {
-				msg.WriteString(i18n.T("cmd.theme.options") + "\n")
+				// 使用全局定义的有效主题列表
+				themesStr := strings.Join(dirlist.GetSupportedThemes(), ", ")
+				msg.WriteString(i18n.T("cmd.theme.options") + themesStr + "\n")
 			} else if args[0] == "auto-open" || args[0] == "enable-dir-listing" {
 				msg.WriteString(i18n.T("cmd.bool.options") + "\n")
 			} else if args[0] == "language" {
-				msg.WriteString(i18n.T("cmd.language.options") + "\n")
+				// 使用语言模块提供的支持语言列表
+				supportedLangs := strings.Join(i18n.GetSupportedLanguages(), ", ")
+				msg.WriteString(i18n.T("cmd.language.options") + supportedLangs + "\n")
 			}
 		}
 	}
@@ -162,8 +170,15 @@ var configGetCmd = &cobra.Command{
 	Long:  i18n.T("cmd.config.get.long"),
 	// 不使用标准参数验证，改用自定义验证
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			// 直接返回原始错误字符串，不需要格式化，避免fmt错误信息重复
+		if len(args) == 0 {
+			// 没有提供配置项，列出所有可用的配置项
+			fmt.Println(i18n.T("cmd.available_items"))
+			for _, key := range validConfigKeys {
+				fmt.Println("  -", key)
+			}
+			os.Exit(0)
+		} else if len(args) > 1 {
+			// 提供了过多的参数
 			return errors.New(generateConfigCommandHelp("get", args))
 		}
 		return nil
@@ -200,10 +215,46 @@ var configSetCmd = &cobra.Command{
 	Long:  i18n.T("cmd.config.set.long"),
 	// 不使用标准参数验证，改用自定义验证
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 2 {
-			// 直接返回原始错误字符串，不需要格式化，避免fmt错误信息重复
+		if len(args) == 0 {
+			// 没有提供任何参数，显示常规帮助信息
 			return errors.New(generateConfigCommandHelp("set", args))
+		} else if len(args) == 1 {
+			// 只提供了配置项名称，但没有提供值
+			key := args[0]
+			if !isValidConfigKey(key) {
+				return generateInvalidKeyError(key)
+			}
+
+			// 根据配置项类型，直接显示可选的值并退出程序
+			switch key {
+			case "theme":
+				// 直接显示所有可用主题
+				fmt.Println(i18n.T("cmd.theme.options"))
+				for _, theme := range dirlist.GetSupportedThemes() {
+					fmt.Println("  -", theme)
+				}
+				os.Exit(0)
+			case "auto-open", "enable-dir-listing":
+				fmt.Println(i18n.T("cmd.bool.options"))
+				fmt.Println("  - true, yes, y, 1, on")
+				fmt.Println("  - false, no, n, 0, off")
+				os.Exit(0)
+			case "language":
+				fmt.Println(i18n.T("cmd.language.options"))
+				langs := i18n.GetSupportedLanguages()
+				for _, lang := range langs {
+					// 尝试获取该语言的显示名称
+					displayName := i18n.GetLanguageDisplayName(lang)
+					fmt.Printf("  - %s (%s)\n", lang, displayName)
+				}
+				os.Exit(0)
+			}
+		} else if len(args) > 2 {
+			// 参数太多
+			return errors.New(generateConfigCommandHelp("set", []string{args[0]}))
 		}
+
+		// 正确提供了两个参数
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -316,16 +367,17 @@ func setConfigValue(key, value string) error {
 
 	case "theme":
 		// 验证主题名称是否有效
-		validThemes := []string{"default", "dark", "blue", "green", "retro", "json", "table"}
 		isValid := false
-		for _, theme := range validThemes {
+		for _, theme := range dirlist.GetSupportedThemes() {
 			if value == theme {
 				isValid = true
 				break
 			}
 		}
 		if !isValid {
-			return fmt.Errorf(i18n.Tf("error.invalid_theme", value))
+			// 传入所有支持的主题列表
+			themesStr := strings.Join(dirlist.GetSupportedThemes(), ", ")
+			return fmt.Errorf(i18n.Tf("error.invalid_theme", value, themesStr))
 		}
 		viper.Set(key, value)
 

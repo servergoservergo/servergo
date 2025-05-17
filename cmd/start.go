@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 
 	"github.com/CC11001100/servergo/pkg/auth"
 	"github.com/CC11001100/servergo/pkg/config"
+	"github.com/CC11001100/servergo/pkg/dirlist"
 	"github.com/CC11001100/servergo/pkg/i18n"
 	"github.com/CC11001100/servergo/pkg/logger"
 	"github.com/CC11001100/servergo/pkg/server"
@@ -52,6 +54,17 @@ var startCmd = &cobra.Command{
 		// 如果命令行未指定是否自动打开浏览器，使用配置中的设置
 		if !cmd.Flags().Changed("open") {
 			autoOpen = cfg.AutoOpen
+		}
+
+		// 如果用户提供了主题标志但没有值，显示可用主题
+		if cmd.Flags().Changed("theme") && theme == "" {
+			// 使用dirlist包中定义的有效主题列表
+			fmt.Println("可用主题:")
+			for _, t := range dirlist.ValidThemes {
+				fmt.Printf("  - %s\n", t)
+			}
+			fmt.Println("\n示例: --theme dark")
+			os.Exit(0)
 		}
 
 		// 探测可用端口

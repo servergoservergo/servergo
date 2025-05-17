@@ -65,8 +65,11 @@ func Execute() {
 	// 执行命令
 	err := RootCmd.Execute()
 	if err != nil {
+		// 使用自定义错误处理函数生成更友好的错误消息
+		friendlyErrMsg := FriendlyErrorMessage(err)
+
 		// 使用fmt直接打印错误到标准错误输出，不使用logger避免日期前缀等
-		fmt.Fprintln(os.Stderr, i18n.T("error.prefix"), err)
+		fmt.Fprintln(os.Stderr, i18n.T("error.prefix"), friendlyErrMsg)
 		os.Exit(1)
 	}
 }

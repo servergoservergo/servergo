@@ -109,6 +109,10 @@ func New(config Config) (*FileServer, error) {
 	theme := config.Theme
 	if theme == "" {
 		theme = dirlist.DefaultTheme
+	} else if !dirlist.IsValidTheme(theme) {
+		// 如果提供了无效的主题，记录警告并回退到默认主题
+		logger.Warning(fmt.Sprintf("无效的主题名称 '%s'，使用默认主题 '%s'", theme, dirlist.DefaultTheme))
+		theme = dirlist.DefaultTheme
 	}
 
 	// 创建目录列表模板
@@ -116,6 +120,14 @@ func New(config Config) (*FileServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf(i18n.Tf("http.500_template", err))
 	}
+
+	// 在这里检查dirTemplate是否初始化成功
+	if dirTemplate == nil {
+		return nil, fmt.Errorf("无法初始化目录列表模板")
+	}
+
+	// 额外记录成功加载的主题信息
+	logger.Info(fmt.Sprintf("成功加载目录列表主题: %s", dirTemplate.GetTheme()))
 
 	return &FileServer{
 		config:        config,

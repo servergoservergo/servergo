@@ -1,35 +1,58 @@
 .PHONY: build clean test release goreleaser snapshot tag
 
-# 默认版本号
-VERSION ?= 0.1.0
+# 版本信息
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+GIT_COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+GIT_REF ?= $(shell git symbolic-ref -q --short HEAD 2>/dev/null || git describe --tags --exact-match 2>/dev/null || echo "unknown")
+BUILD_TIME ?= $(shell date -u '+%Y-%m-%d %H:%M:%S')
+
+# Go命令
+GO = go
+GOBUILD = $(GO) build
+GOCLEAN = $(GO) clean
+GOTEST = $(GO) test
+GOGET = $(GO) get
+
+# 项目信息
+BINARY_NAME = servergo
+MAIN_PACKAGE = .
+
+# Go构建参数
+LDFLAGS = -ldflags "\
+	-X 'github.com/CC11001100/servergo/pkg/version.Version=$(VERSION)' \
+	-X 'github.com/CC11001100/servergo/pkg/version.BuildTime=$(BUILD_TIME)' \
+	-X 'github.com/CC11001100/servergo/pkg/version.GitCommit=$(GIT_COMMIT)' \
+	-X 'github.com/CC11001100/servergo/pkg/version.GitRef=$(GIT_REF)' \
+	-w -s"
 
 # 主要目标
 build:
 	@echo "开始构建..."
-	@chmod +x ./build.sh
-	@VERSION=$(VERSION) ./build.sh
+	@$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME) $(MAIN_PACKAGE)
 
 # 生成发布版本（带有版本标签）
 release:
-	@echo "构建发布版本 v$(VERSION)..."
-	@chmod +x ./build.sh
-	@VERSION=$(VERSION) ./build.sh
+	@echo "构建发布版本 $(BINARY_NAME) $(VERSION)"
+	@$(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME) $(MAIN_PACKAGE)
+	@echo "创建发布压缩文件..."
+	@tar -czvf $(BINARY_NAME)-$(VERSION)-$(shell go env GOOS)-$(shell go env GOARCH).tar.gz $(BINARY_NAME)
 
 # 清理
 clean:
 	@echo "清理项目..."
-	@rm -f servergo
-	@rm -rf dist/
+	@$(GOCLEAN)
+	@rm -f $(BINARY_NAME)
+	@rm -f $(BINARY_NAME)-*.tar.gz
 
 # 运行测试
 test:
 	@echo "运行测试..."
-	@go test ./...
+	@$(GOTEST) -v ./...
 
 # 安装到系统
 install: build
 	@echo "安装到系统..."
-	@cp servergo /usr/local/bin/
+	@$(BINARY_NAME) install
 
 # 使用 GoReleaser 进行发布
 goreleaser:

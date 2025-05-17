@@ -6,11 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/CC11001100/servergo/pkg/logger"
+	"github.com/CC11001100/servergo/pkg/version"
 )
-
-// 当前版本号 - 这个应该从项目的某个地方导入
-// 这里临时硬编码，实际应该从项目版本配置中获取
-const CurrentVersion = "1.0.0"
 
 // Installer 接口定义了安装程序的方法
 type Installer interface {
@@ -51,8 +48,10 @@ func InstallToPath() error {
 		return err
 	}
 
+	currentVersion := version.Version
 	logger.Info("当前可执行文件路径: %s", execPath)
-	logger.Info("当前版本: %s", CurrentVersion)
+	logger.Info("当前版本: %s", currentVersion)
+	logger.Info("构建信息: %s", version.GetBuildInfo())
 
 	// 获取对应操作系统的安装器
 	installer := NewInstaller()
@@ -60,14 +59,14 @@ func InstallToPath() error {
 	// 检查是否已安装
 	installedVer, err := GetInstalledVersion()
 	if err == nil && installedVer != nil {
-		compareResult := CompareVersions(installedVer.Version, CurrentVersion)
+		compareResult := CompareVersions(installedVer.Version, currentVersion)
 		switch compareResult {
 		case 0:
-			logger.Info("检测到已安装相同版本 %s，将重新安装...", CurrentVersion)
+			logger.Info("检测到已安装相同版本 %s，将重新安装...", currentVersion)
 		case -1:
-			logger.Info("检测到已安装旧版本 %s，将升级到新版本 %s...", installedVer.Version, CurrentVersion)
+			logger.Info("检测到已安装旧版本 %s，将升级到新版本 %s...", installedVer.Version, currentVersion)
 		case 1:
-			logger.Warning("警告: 当前版本 %s 低于已安装版本 %s，降级可能导致兼容性问题", CurrentVersion, installedVer.Version)
+			logger.Warning("警告: 当前版本 %s 低于已安装版本 %s，降级可能导致兼容性问题", currentVersion, installedVer.Version)
 			logger.Info("继续安装，将替换为当前版本...")
 		}
 	} else {
@@ -80,7 +79,7 @@ func InstallToPath() error {
 	}
 
 	// 保存版本信息
-	if err := SaveVersionInfo(CurrentVersion, execPath); err != nil {
+	if err := SaveVersionInfo(currentVersion, execPath); err != nil {
 		logger.Warning("保存版本信息失败: %v", err)
 	}
 
