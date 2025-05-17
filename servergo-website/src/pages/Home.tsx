@@ -1,150 +1,180 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Row, Col, Button, Typography, Card, Space } from 'antd';
-import {
-  RocketOutlined,
-  ThunderboltOutlined,
-  SecurityScanOutlined,
-  AppstoreOutlined,
-  BgColorsOutlined,
-} from '@ant-design/icons';
+import { Link } from 'react-router-dom'
+import { FiDownload, FiCode, FiServer, FiShield, FiZap } from 'react-icons/fi'
+import Card from '../components/Card'
+import CodeBlock from '../components/CodeBlock'
 
-const { Title, Paragraph } = Typography;
-
-const Home: React.FC = () => {
+export default function Home() {
   return (
     <div>
       {/* 英雄区域 */}
-      <div className="home-hero">
-        <Title level={1}>ServerGo</Title>
-        <Paragraph style={{ fontSize: '18px', maxWidth: '800px', margin: '0 auto' }}>
-          简单易用的文件服务器，让文件共享变得简单快捷
-        </Paragraph>
-        <div className="hero-buttons">
-          <Space>
-            <Button type="primary" size="large" icon={<RocketOutlined />}>
-              <Link to="/getting-started">快速开始</Link>
-            </Button>
-            <Button size="large" icon={<ThunderboltOutlined />}>
-              <a href="https://github.com/cc11001100/servergo/releases" target="_blank" rel="noopener noreferrer">
-                下载最新版本
-              </a>
-            </Button>
-          </Space>
+      <section style={{ 
+        textAlign: 'center',
+        padding: '60px 0',
+        backgroundColor: 'var(--bg-light)',
+        borderRadius: 'var(--border-radius)',
+        margin: '0 0 60px'
+      }}>
+        <h1 style={{ 
+          fontSize: '2.5rem',
+          marginBottom: '16px',
+          color: 'var(--text-dark)'
+        }}>
+          <FiServer style={{ marginRight: '12px' }} />
+          ServerGo
+        </h1>
+        
+        <p style={{ 
+          fontSize: '1.25rem',
+          maxWidth: '700px',
+          margin: '0 auto 30px',
+          color: 'var(--text-light)'
+        }}>
+          轻量级、高性能、易使用的静态文件服务器
+        </p>
+        
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <Link to="/download" className="btn">
+            <FiDownload />
+            下载
+          </Link>
+          <Link to="/docs" className="btn btn-secondary">
+            <FiCode />
+            查看文档
+          </Link>
         </div>
-      </div>
-
-      {/* 功能特点区域 */}
-      <div className="feature-section">
-        <Title level={2}>主要特性</Title>
-        <Row gutter={[24, 24]} justify="center">
-          <Col xs={24} md={12} lg={8}>
-            <Card className="feature-card">
-              <ThunderboltOutlined />
-              <Title level={4}>快速部署</Title>
-              <Paragraph>
-                一键启动，零配置，快速搭建本地文件服务器，无需复杂设置。
-              </Paragraph>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={12} lg={8}>
-            <Card className="feature-card">
-              <SecurityScanOutlined />
-              <Title level={4}>安全可靠</Title>
-              <Paragraph>
-                支持基本认证(Basic Auth)，保护您的文件安全，防止未授权访问。
-              </Paragraph>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={12} lg={8}>
-            <Card className="feature-card">
-              <AppstoreOutlined />
-              <Title level={4}>功能丰富</Title>
-              <Paragraph>
-                支持目录浏览、文件下载、自定义端口等多种功能，满足各种需求。
-              </Paragraph>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={12} lg={8}>
-            <Card className="feature-card">
-              <BgColorsOutlined />
-              <Title level={4}>多主题支持</Title>
-              <Paragraph>
-                提供多种目录浏览主题，包括默认、暗黑、蓝色、绿色和复古DOS风格。
-              </Paragraph>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-
-      {/* 主题展示区域 */}
-      <div className="theme-showcase">
-        <Title level={2}>精美主题</Title>
-        <Paragraph style={{ marginBottom: '30px' }}>
-          ServerGo提供多种目录浏览主题，让您的文件服务器更加美观
-        </Paragraph>
-
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8}>
-            <Card title="默认主题" className="theme-card">
-              <div className="theme-preview" style={{ backgroundColor: '#fff', border: '1px solid #f0f0f0' }}>
-                <div style={{ padding: '20px', textAlign: 'left' }}>
-                  <div style={{ marginBottom: '10px', color: '#1890ff', fontWeight: 'bold' }}>目录: /example</div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <span style={{ marginRight: '5px' }}>📁</span> 
-                    <span>documents/</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <span style={{ marginRight: '5px' }}>📄</span> 
-                    <span>readme.txt</span>
-                  </div>
-                </div>
+      </section>
+      
+      {/* 快速开始 */}
+      <section style={{ marginBottom: '60px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>快速开始</h2>
+        
+        <Card>
+          <div style={{ marginBottom: '24px' }}>
+            <h3>基本用法</h3>
+            <p>在当前目录启动一个文件服务器：</p>
+            <CodeBlock code="servergo" />
+          </div>
+          
+          <div style={{ marginBottom: '24px' }}>
+            <h3>指定端口</h3>
+            <p>在指定端口启动：</p>
+            <CodeBlock code="servergo -p 3000" />
+          </div>
+          
+          <div>
+            <h3>指定目录</h3>
+            <p>为特定目录提供服务：</p>
+            <CodeBlock code="servergo -d /path/to/files" />
+          </div>
+        </Card>
+      </section>
+      
+      {/* 核心特性 */}
+      <section style={{ marginBottom: '60px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>核心特性</h2>
+        
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '24px'
+        }}>
+          <Card>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '16px'
+            }}>
+              <div style={{ 
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'var(--primary-light)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '16px',
+                color: 'white',
+                fontSize: '24px'
+              }}>
+                <FiZap />
               </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} sm={12} md={8}>
-            <Card title="暗黑主题" className="theme-card">
-              <div className="theme-preview" style={{ backgroundColor: '#141414', color: '#fff', border: '1px solid #303030' }}>
-                <div style={{ padding: '20px', textAlign: 'left' }}>
-                  <div style={{ marginBottom: '10px', color: '#177ddc', fontWeight: 'bold' }}>目录: /example</div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', color: '#d9d9d9' }}>
-                    <span style={{ marginRight: '5px' }}>📁</span> 
-                    <span>documents/</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', color: '#d9d9d9' }}>
-                    <span style={{ marginRight: '5px' }}>📄</span> 
-                    <span>readme.txt</span>
-                  </div>
-                </div>
+              <h3 style={{ margin: 0 }}>高性能</h3>
+            </div>
+            <p>使用Go语言原生开发，资源占用低，传输速度快。即使在资源有限的环境中也能高效运行。</p>
+          </Card>
+          
+          <Card>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '16px'
+            }}>
+              <div style={{ 
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'var(--primary-light)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '16px',
+                color: 'white',
+                fontSize: '24px'
+              }}>
+                <FiCode />
               </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} sm={12} md={8}>
-            <Card title="复古DOS主题" className="theme-card">
-              <div className="theme-preview" style={{ backgroundColor: '#000084', color: '#00ff00', border: '1px solid #00aaaa' }}>
-                <div style={{ padding: '20px', textAlign: 'left', fontFamily: 'monospace' }}>
-                  <div style={{ marginBottom: '10px', color: '#ffff00', fontWeight: 'bold' }}>目录: C:\\example</div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <span style={{ marginRight: '5px' }}>[DIR]</span> 
-                    <span>documents/</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    <span style={{ marginRight: '5px' }}>[FILE]</span> 
-                    <span>readme.txt</span>
-                  </div>
-                </div>
+              <h3 style={{ margin: 0 }}>简单易用</h3>
+            </div>
+            <p>零配置启动，简洁的命令行参数，直观的Web界面。无需复杂设置即可快速共享文件。</p>
+          </Card>
+          
+          <Card>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '16px'
+            }}>
+              <div style={{ 
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'var(--primary-light)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '16px',
+                color: 'white',
+                fontSize: '24px'
+              }}>
+                <FiShield />
               </div>
-            </Card>
-          </Col>
-        </Row>
-      </div>
+              <h3 style={{ margin: 0 }}>安全可靠</h3>
+            </div>
+            <p>支持HTTPS加密、基本认证以及其他安全特性。可以安全地共享敏感文件和内部文档。</p>
+          </Card>
+        </div>
+      </section>
+      
+      {/* 行动号召 */}
+      <section style={{ 
+        textAlign: 'center',
+        backgroundColor: 'var(--primary-color)',
+        padding: '40px',
+        borderRadius: 'var(--border-radius)',
+        color: 'white'
+      }}>
+        <h2 style={{ marginBottom: '16px' }}>准备好了吗？立即开始使用 ServerGo！</h2>
+        <p style={{ marginBottom: '24px', opacity: 0.8 }}>免费、开源，适用于所有主流操作系统</p>
+        <Link to="/download" className="btn" style={{ 
+          backgroundColor: 'white',
+          color: 'var(--primary-color)',
+          padding: '12px 24px',
+          fontSize: '1.1rem'
+        }}>
+          <FiDownload />
+          立即下载
+        </Link>
+      </section>
     </div>
-  );
-};
-
-export default Home; 
+  )
+} 
