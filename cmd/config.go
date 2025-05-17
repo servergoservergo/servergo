@@ -233,6 +233,10 @@ var configSetCmd = &cobra.Command{
 			if err := i18n.Init(value); err != nil {
 				logger.Warning(i18n.Tf("config.language_init_error", err))
 			}
+
+			// 重新初始化命令描述
+			UpdateCommandDescriptions()
+
 			languageDisplayName := i18n.GetLanguageDisplayName(value)
 			logger.Info(i18n.Tf("config.language_changed", languageDisplayName))
 		} else {

@@ -56,7 +56,7 @@ func Execute() {
 	}
 
 	// 更新所有命令的描述为当前语言
-	updateCommandDescriptions()
+	UpdateCommandDescriptions()
 
 	// 阻止Cobra默认的错误打印和使用说明打印
 	RootCmd.SilenceErrors = true
@@ -71,8 +71,8 @@ func Execute() {
 	}
 }
 
-// updateCommandDescriptions 更新所有命令的描述为当前语言
-func updateCommandDescriptions() {
+// UpdateCommandDescriptions 更新所有命令的描述为当前语言
+func UpdateCommandDescriptions() {
 	// 更新根命令
 	RootCmd.Short = i18n.T("cmd.root.short")
 	RootCmd.Long = i18n.T("cmd.root.long")
