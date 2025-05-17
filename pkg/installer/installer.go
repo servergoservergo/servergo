@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/CC11001100/servergo/pkg/logger"
 )
@@ -19,20 +18,6 @@ type Installer interface {
 	Install(executablePath string) error
 	// Uninstall 从系统PATH中移除程序
 	Uninstall() error
-}
-
-// GetInstaller 根据当前操作系统返回对应的安装器
-func GetInstaller() (Installer, error) {
-	switch runtime.GOOS {
-	case "darwin":
-		return NewMacInstaller(), nil
-	case "windows":
-		return NewWindowsInstaller(), nil
-	case "linux":
-		return NewLinuxInstaller(), nil
-	default:
-		return nil, fmt.Errorf("暂不支持的操作系统: %s", runtime.GOOS)
-	}
 }
 
 // GetExecutablePath 获取当前可执行文件的路径
@@ -69,20 +54,12 @@ func InstallToPath() error {
 	logger.Info("当前可执行文件路径: %s", execPath)
 	logger.Info("当前版本: %s", CurrentVersion)
 
+	// 获取对应操作系统的安装器
+	installer := NewInstaller()
+
 	// 检查是否已安装
 	installedVer, err := GetInstalledVersion()
-	if err != nil {
-		logger.Warning("检查已安装版本时出错: %v", err)
-	}
-
-	// 获取对应操作系统的安装器
-	installer, err := GetInstaller()
-	if err != nil {
-		return err
-	}
-
-	// 如果已经安装了相同版本，询问用户是否继续
-	if installedVer != nil {
+	if err == nil && installedVer != nil {
 		compareResult := CompareVersions(installedVer.Version, CurrentVersion)
 		switch compareResult {
 		case 0:
@@ -113,10 +90,7 @@ func InstallToPath() error {
 // UninstallFromPath 执行卸载过程
 func UninstallFromPath() error {
 	// 获取对应操作系统的安装器
-	installer, err := GetInstaller()
-	if err != nil {
-		return err
-	}
+	installer := NewInstaller()
 
 	// 获取已安装版本信息
 	installedVer, _ := GetInstalledVersion()
@@ -126,4 +100,31 @@ func UninstallFromPath() error {
 
 	// 执行卸载
 	return installer.Uninstall()
+}
+
+// isSameFile 检查两个文件是否相同 (通用辅助函数)
+func isSameFile(file1, file2 string) bool {
+	// 检查文件大小
+	stat1, err1 := os.Stat(file1)
+	stat2, err2 := os.Stat(file2)
+
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	// 如果文件大小不同，则肯定不是同一个文件
+	if stat1.Size() != stat2.Size() {
+		return false
+	}
+
+	// 读取两个文件内容进行比较
+	content1, err1 := os.ReadFile(file1)
+	content2, err2 := os.ReadFile(file2)
+
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	// 内容完全相同则认为是同一个文件
+	return string(content1) == string(content2)
 }

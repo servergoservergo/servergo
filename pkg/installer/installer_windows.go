@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 package installer
 
 import (
@@ -18,8 +21,8 @@ type WindowsInstaller struct {
 	targetDir string
 }
 
-// NewWindowsInstaller 创建一个新的Windows安装器
-func NewWindowsInstaller() *WindowsInstaller {
+// NewInstaller 创建一个适用于Windows的安装器
+func NewInstaller() Installer {
 	// 默认安装到用户目录下的.servergo\bin目录
 	// 这样不需要管理员权限
 	homeDir, err := os.UserHomeDir()
@@ -29,6 +32,8 @@ func NewWindowsInstaller() *WindowsInstaller {
 	}
 
 	targetDir := filepath.Join(homeDir, ".servergo", "bin")
+	logger.Info("将安装到 %s 目录", targetDir)
+
 	return &WindowsInstaller{
 		targetDir: targetDir,
 	}
@@ -119,33 +124,6 @@ func (w *WindowsInstaller) Install(executablePath string) error {
 	return nil
 }
 
-// isSameFile 检查两个文件是否相同
-func isSameFile(file1, file2 string) bool {
-	// 检查文件大小
-	stat1, err1 := os.Stat(file1)
-	stat2, err2 := os.Stat(file2)
-
-	if err1 != nil || err2 != nil {
-		return false
-	}
-
-	// 如果文件大小不同，则肯定不是同一个文件
-	if stat1.Size() != stat2.Size() {
-		return false
-	}
-
-	// 读取两个文件内容进行比较
-	content1, err1 := os.ReadFile(file1)
-	content2, err2 := os.ReadFile(file2)
-
-	if err1 != nil || err2 != nil {
-		return false
-	}
-
-	// 内容完全相同则认为是同一个文件
-	return string(content1) == string(content2)
-}
-
 // Uninstall 在Windows系统中从PATH移除程序
 func (w *WindowsInstaller) Uninstall() error {
 	targetPath := filepath.Join(w.targetDir, "servergo.exe")
@@ -206,7 +184,7 @@ func (w *WindowsInstaller) addToPath() error {
 	return nil
 }
 
-// removeFromPath 从用户的PATH环境变量中移除目标目录
+// removeFromPath 从用户PATH环境变量中移除目标目录
 func (w *WindowsInstaller) removeFromPath() error {
 	// 获取当前的PATH环境变量
 	pathEnv, exists := os.LookupEnv("PATH")
@@ -214,31 +192,27 @@ func (w *WindowsInstaller) removeFromPath() error {
 		return fmt.Errorf("无法获取PATH环境变量")
 	}
 
-	// 分割PATH
+	// 分割PATH环境变量
 	paths := strings.Split(pathEnv, string(os.PathListSeparator))
 
-	// 从PATH中移除目标目录
+	// 移除目标目录
 	var newPaths []string
-	removed := false
 	for _, path := range paths {
 		if !strings.EqualFold(path, w.targetDir) {
 			newPaths = append(newPaths, path)
-		} else {
-			removed = true
 		}
 	}
 
-	// 如果目标目录不在PATH中，不需要更新
-	if !removed {
-		logger.Info("目标目录未在PATH中，无需移除")
+	// 如果目录不在PATH中，则无需修改
+	if len(paths) == len(newPaths) {
+		logger.Info("目标目录不在PATH中，无需修改")
 		return nil
 	}
 
-	// 重新组合PATH
-	newPathEnv := strings.Join(newPaths, string(os.PathListSeparator))
-
 	// 使用setx命令更新用户PATH环境变量
-	logger.Info("从PATH环境变量中移除 %s", w.targetDir)
+	newPathEnv := strings.Join(newPaths, string(os.PathListSeparator))
+	logger.Info("从PATH环境变量移除 %s", w.targetDir)
+
 	cmd := exec.Command("setx", "PATH", newPathEnv)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

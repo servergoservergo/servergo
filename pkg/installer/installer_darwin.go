@@ -1,3 +1,6 @@
+//go:build darwin
+// +build darwin
+
 package installer
 
 import (
@@ -15,8 +18,8 @@ type MacInstaller struct {
 	targetDir string
 }
 
-// NewMacInstaller 创建一个新的macOS安装器
-func NewMacInstaller() *MacInstaller {
+// NewInstaller 创建一个适用于macOS的安装器
+func NewInstaller() Installer {
 	return &MacInstaller{
 		targetDir: "/usr/local/bin",
 	}
@@ -24,6 +27,8 @@ func NewMacInstaller() *MacInstaller {
 
 // Install 在macOS系统中安装程序到PATH
 func (m *MacInstaller) Install(executablePath string) error {
+	logger.Info("当前可执行文件路径: %s", executablePath)
+
 	// 检查目标目录是否存在，如果不存在则尝试创建
 	if _, err := os.Stat(m.targetDir); os.IsNotExist(err) {
 		logger.Info("目标目录 %s 不存在，尝试创建...", m.targetDir)

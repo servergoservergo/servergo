@@ -1,3 +1,6 @@
+//go:build linux
+// +build linux
+
 package installer
 
 import (
@@ -15,8 +18,8 @@ type LinuxInstaller struct {
 	targetDir string
 }
 
-// NewLinuxInstaller 创建一个新的Linux安装器
-func NewLinuxInstaller() *LinuxInstaller {
+// NewInstaller 创建一个适用于Linux的安装器
+func NewInstaller() Installer {
 	return &LinuxInstaller{
 		targetDir: "/usr/local/bin",
 	}
@@ -24,6 +27,8 @@ func NewLinuxInstaller() *LinuxInstaller {
 
 // Install 在Linux系统中安装程序到PATH
 func (l *LinuxInstaller) Install(executablePath string) error {
+	logger.Info("当前可执行文件路径: %s", executablePath)
+
 	// 检查目标目录是否存在，如果不存在则尝试创建
 	if _, err := os.Stat(l.targetDir); os.IsNotExist(err) {
 		logger.Info("目标目录 %s 不存在，尝试创建...", l.targetDir)
