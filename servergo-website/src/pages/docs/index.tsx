@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { FiHome, FiCommand, FiLock, FiSettings, FiServer, FiHelpCircle } from 'react-icons/fi'
+import { FiHome, FiCommand, FiLock, FiSettings, FiServer, FiHelpCircle, FiChevronRight } from 'react-icons/fi'
+import './docs.css'
 
 // 直接导入文档组件，而不是使用懒加载
 import GettingStarted from './GettingStarted'
@@ -12,29 +13,8 @@ import FAQ from './FAQ'
 
 // 定义Loading组件
 const Loading = () => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    padding: '40px',
-    minHeight: '300px'
-  }}>
-    <div style={{ 
-      display: 'inline-block',
-      width: '50px',
-      height: '50px',
-      border: '5px solid var(--border-color)',
-      borderTopColor: 'var(--primary-color)',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite'
-    }} />
-    <style>
-      {`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}
-    </style>
+  <div className="loading-container">
+    <div className="loading-spinner"></div>
   </div>
 )
 
@@ -52,6 +32,7 @@ export default function Docs() {
   const location = useLocation()
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState('getting-started')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // 从URL哈希中获取当前活动部分
   useEffect(() => {
@@ -68,86 +49,30 @@ export default function Docs() {
   const handleSectionChange = (sectionId: string) => {
     setActiveSection(sectionId)
     navigate(`#${sectionId}`)
+    setIsMobileMenuOpen(false) // 在移动端点击后关闭菜单
   }
 
   // 查找当前活动部分
   const currentSection = sections.find(section => section.id === activeSection) || sections[0]
 
+  // 切换移动端菜单
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
+
   return (
     <div className="docs-container">
-      <style>
-        {`
-          .docs-container {
-            display: flex;
-            margin-top: 20px;
-          }
-          
-          .docs-sidebar {
-            width: 250px;
-            min-width: 250px;
-            padding-right: 30px;
-          }
-          
-          .docs-content {
-            flex: 1;
-            padding-bottom: 60px;
-          }
-          
-          .section-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            cursor: pointer;
-          }
-          
-          .section-link:hover {
-            background-color: var(--hover-color);
-          }
-          
-          .section-link.active {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-          }
-          
-          .section-link svg {
-            margin-right: 10px;
-            font-size: 18px;
-          }
-          
-          @media (max-width: 768px) {
-            .docs-container {
-              flex-direction: column;
-            }
-            
-            .docs-sidebar {
-              width: 100%;
-              padding-right: 0;
-              margin-bottom: 30px;
-            }
-            
-            .docs-sidebar-inner {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 8px;
-            }
-            
-            .section-link {
-              padding: 8px 12px;
-              margin-bottom: 0;
-              font-size: 0.9rem;
-            }
-          }
-        `}
-      </style>
+      {/* 移动设备菜单切换按钮 */}
+      <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+        <span className="current-section">
+          {currentSection.icon}
+          {currentSection.name}
+        </span>
+        <FiChevronRight className={isMobileMenuOpen ? 'open' : ''} />
+      </div>
 
       {/* 侧边栏导航 */}
-      <div className="docs-sidebar">
+      <div className={`docs-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="docs-sidebar-inner">
           {sections.map(section => (
             <div 

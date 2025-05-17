@@ -1,4 +1,5 @@
 import type { ReactNode, CSSProperties } from 'react'
+import './Card.css'
 
 interface CardProps {
   title?: ReactNode;
@@ -6,18 +7,38 @@ interface CardProps {
   extra?: ReactNode;
   style?: CSSProperties;
   className?: string;
+  variant?: 'default' | 'primary' | 'info' | 'success' | 'warning';
+  bordered?: boolean;
+  hoverable?: boolean;
 }
 
-export default function Card({ title, children, extra, style, className }: CardProps) {
+export default function Card({ 
+  title, 
+  children, 
+  extra, 
+  style, 
+  className, 
+  variant = 'default',
+  bordered = true,
+  hoverable = false
+}: CardProps) {
+  const cardClasses = [
+    'card',
+    `card-${variant}`,
+    bordered ? 'card-bordered' : '',
+    hoverable ? 'card-hoverable' : '',
+    className || ''
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`card ${className || ''}`} style={style}>
+    <div className={cardClasses} style={style}>
       {title && (
-        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div className="card-header">
           <div className="card-title">{title}</div>
           {extra && <div className="card-extra">{extra}</div>}
         </div>
       )}
-      {!title && extra}
+      {!title && extra && <div className="card-extra-only">{extra}</div>}
       <div className="card-content">{children}</div>
     </div>
   )
