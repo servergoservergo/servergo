@@ -68,3 +68,4 @@ yarn-error.log*
 
 # 其他不需要版本控制的文件
 /Formula/ .cursor/
+.cursor/
