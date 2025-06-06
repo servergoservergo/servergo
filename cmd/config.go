@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"errors"
@@ -24,6 +25,7 @@ var validConfigKeys = []string{
 	"theme",                  // 目录列表主题
 	"language",               // 界面语言
 	"enable-log-persistence", // 是否启用日志持久化
+	"start-port",             // 从哪个端口开始递增寻找空闲端口
 	// 在这里添加其他支持的配置键
 }
 
@@ -95,6 +97,7 @@ var configListCmd = &cobra.Command{
 			{"theme", cfg.Theme, i18n.T("config.theme_desc")},
 			{"language", formatLanguageValue(cfg.Language), i18n.T("config.language_desc")},
 			{"enable-log-persistence", formatBoolValue(cfg.EnableLogPersistence), i18n.T("config.enable_log_persistence_desc")},
+			{"start-port", fmt.Sprintf("%d", cfg.StartPort), i18n.T("config.start_port_desc")},
 		})
 
 		// 设置列对齐方式
@@ -158,6 +161,8 @@ func generateConfigCommandHelp(cmdName string, args []string) string {
 				// 使用语言模块提供的支持语言列表
 				supportedLangs := strings.Join(i18n.GetSupportedLanguages(), ", ")
 				msg.WriteString(i18n.T("cmd.language.options") + supportedLangs + "\n")
+			} else if args[0] == "start-port" {
+				msg.WriteString(i18n.T("cmd.start_port.options") + "\n")
 			}
 		}
 	}
@@ -338,6 +343,7 @@ func generateInvalidKeyError(key string) error {
 	msg.WriteString("  - " + i18n.T("error.theme_desc") + "\n")
 	msg.WriteString("  - " + i18n.T("error.language_desc") + "\n")
 	msg.WriteString("  - " + i18n.T("error.enable_log_persistence_desc") + "\n")
+	msg.WriteString("  - " + i18n.T("error.start_port_desc") + "\n")
 
 	return fmt.Errorf(msg.String())
 }
@@ -367,6 +373,18 @@ func setConfigValue(key, value string) error {
 			return err
 		}
 		viper.Set(key, boolValue)
+
+	case "start-port":
+		// 将输入转换为整数
+		portValue, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf(i18n.Tf("error.invalid_port_number", value))
+		}
+		// 验证端口范围
+		if portValue < 0 || portValue > 65535 {
+			return fmt.Errorf(i18n.Tf("error.port_out_of_range", portValue))
+		}
+		viper.Set(key, portValue)
 
 	case "theme":
 		// 验证主题名称是否有效
