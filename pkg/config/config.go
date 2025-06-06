@@ -30,6 +30,8 @@ type Config struct {
 	Language string `mapstructure:"language"`
 	// 是否启用日志持久化
 	EnableLogPersistence bool `mapstructure:"enable-log-persistence"`
+	// 从哪个端口开始递增寻找空闲端口(0表示随机选择)
+	StartPort int `mapstructure:"start-port"`
 	// 认证相关配置
 	Username string `json:"username" yaml:"username"` // 默认用户名
 	Password string `json:"password" yaml:"password"` // 默认密码
@@ -101,6 +103,7 @@ func SaveConfig(cfg Config) error {
 	viper.Set("theme", cfg.Theme)
 	viper.Set("language", cfg.Language)
 	viper.Set("enable-log-persistence", cfg.EnableLogPersistence)
+	viper.Set("start-port", cfg.StartPort)
 	viper.Set("username", cfg.Username)
 	viper.Set("password", cfg.Password)
 	// 其他配置项设置...
@@ -167,6 +170,7 @@ func SetDefaults() {
 	viper.SetDefault("enable-dir-listing", true)     // 默认启用目录列表功能
 	viper.SetDefault("theme", "default")             // 默认使用默认主题
 	viper.SetDefault("enable-log-persistence", true) // 默认启用日志持久化
+	viper.SetDefault("start-port", 0)                // 默认从0开始递增寻找空闲端口
 	viper.SetDefault("username", "admin")            // 默认用户名
 	viper.SetDefault("password", "")                 // 默认密码为空，将自动生成
 
@@ -183,6 +187,7 @@ func DefaultConfig() Config {
 		Theme:                "default",
 		Language:             i18n.DetectOSLanguage(),
 		EnableLogPersistence: true,
+		StartPort:            0,
 		Username:             "admin", // 默认用户名
 		Password:             "",      // 默认密码为空，将自动生成
 	}
