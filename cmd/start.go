@@ -141,7 +141,7 @@ var startCmd = &cobra.Command{
 		// 探测可用端口
 		// 如果port=0，表示自动探测
 		// 如果port>0，先检查指定端口是否可用，不可用则自动探测
-		actualPort, err := utils.FindAvailablePort(port)
+		actualPort, err := utils.FindAvailablePort(getStartPort())
 		if err != nil {
 			return fmt.Errorf(i18n.T("error.no_port_available"))
 		}
@@ -151,7 +151,15 @@ var startCmd = &cobra.Command{
 			logger.Warning(i18n.Tf("error.port_unavailable", port))
 			logger.Info(i18n.Tf("server.starting", actualPort))
 		} else if port == 0 {
-			logger.Info(i18n.Tf("server.starting", actualPort))
+			startPort := getStartPort()
+			if startPort > 0 && startPort != actualPort {
+				// 使用了配置文件中的起始端口，但实际使用的是不同的端口
+				logger.Info(i18n.Tf("server.using_config_start_port", startPort))
+				logger.Info(i18n.Tf("server.starting", actualPort))
+			} else {
+				// 随机选择的端口
+				logger.Info(i18n.Tf("server.starting", actualPort))
+			}
 		}
 
 		// 转换认证类型
@@ -218,6 +226,24 @@ func openBrowser(url string) {
 	} else {
 		logger.Info(i18n.Tf("server.browser_opened", url))
 	}
+}
+
+// getStartPort 获取起始端口，优先使用命令行参数值，否则使用配置文件中的值
+func getStartPort() int {
+	// 如果命令行指定了端口，使用命令行指定的端口
+	if port > 0 {
+		return port
+	}
+
+	// 否则从配置文件获取起始端口
+	cfg := config.GetConfig()
+	// 如果配置了起始端口，则使用它
+	if cfg.StartPort > 0 {
+		return cfg.StartPort
+	}
+
+	// 如果都没有指定，则返回0表示随机选择
+	return 0
 }
 
 func init() {
