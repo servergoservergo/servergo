@@ -70,28 +70,47 @@ func CheckPort(port int, protocol string) (available bool, err error) {
 
 // FindAvailablePort 寻找一个可用的端口
 // 如果指定了首选端口(preferredPort > 0)，会先检查它是否可用
-// 如果首选端口不可用或未指定，会从随机端口开始探测
+// 如果首选端口不可用或未指定，行为取决于preferredPort的值:
+// - 如果preferredPort > 0: 从该端口开始递增搜索可用端口
+// - 如果preferredPort = 0: 从随机端口开始探测(原有行为)
 func FindAvailablePort(preferredPort int) (int, error) {
 	// 如果指定了首选端口并且可用，直接返回
 	if preferredPort > 0 && IsPortAvailable(preferredPort) {
 		return preferredPort, nil
 	}
 
-	// 随机选择一个起始端口
-	portRange := MaxPort - MinPort + 1
-	startPort := MinPort + rand.Intn(portRange)
+	// 决定起始搜索端口
+	var startPort int
+	if preferredPort > 0 {
+		// 如果指定了首选端口但不可用，从该端口开始递增搜索
+		startPort = preferredPort
+	} else {
+		// 随机选择一个起始端口
+		portRange := MaxPort - MinPort + 1
+		startPort = MinPort + rand.Intn(portRange)
+	}
 
-	// 从随机端口开始，向上循环查找
+	// 验证起始端口范围
+	if startPort < MinPort {
+		startPort = MinPort
+	}
+	if startPort > MaxPort {
+		startPort = MaxPort
+	}
+
+	// 从起始端口开始，向上循环查找
 	for port := startPort; port <= MaxPort; port++ {
 		if IsPortAvailable(port) {
 			return port, nil
 		}
 	}
 
-	// 如果到达最大端口仍未找到，从最小端口到随机端口再次尝试
-	for port := MinPort; port < startPort; port++ {
-		if IsPortAvailable(port) {
-			return port, nil
+	// 如果到达最大端口仍未找到，从最小端口到起始端口再次尝试
+	if startPort > MinPort {
+		for port := MinPort; port < startPort; port++ {
+			if IsPortAvailable(port) {
+				return port, nil
+			}
 		}
 	}
 
@@ -100,6 +119,10 @@ func FindAvailablePort(preferredPort int) (int, error) {
 
 // FindAvailablePortWithProtocol 寻找一个可用的端口，支持指定协议
 // 提供更详细的错误信息，同时支持TCP或UDP协议
+// 如果指定了首选端口(preferredPort > 0)，会先检查它是否可用
+// 如果首选端口不可用或未指定，行为取决于preferredPort的值:
+// - 如果preferredPort > 0: 从该端口开始递增搜索可用端口
+// - 如果preferredPort = 0: 从随机端口开始探测
 func FindAvailablePortWithProtocol(preferredPort int, protocol string) (int, error) {
 	// 设置默认协议
 	if protocol == "" {
@@ -126,11 +149,26 @@ func FindAvailablePortWithProtocol(preferredPort int, protocol string) (int, err
 		}
 	}
 
-	// 随机选择一个起始端口
-	portRange := MaxPort - MinPort + 1
-	startPort := MinPort + rand.Intn(portRange)
+	// 决定起始搜索端口
+	var startPort int
+	if preferredPort > 0 {
+		// 如果指定了首选端口但不可用，从该端口开始递增搜索
+		startPort = preferredPort
+	} else {
+		// 随机选择一个起始端口
+		portRange := MaxPort - MinPort + 1
+		startPort = MinPort + rand.Intn(portRange)
+	}
 
-	// 从随机端口开始，向上循环查找
+	// 验证起始端口范围
+	if startPort < MinPort {
+		startPort = MinPort
+	}
+	if startPort > MaxPort {
+		startPort = MaxPort
+	}
+
+	// 从起始端口开始，向上循环查找
 	for port := startPort; port <= MaxPort; port++ {
 		available, err := CheckPort(port, protocol)
 		if err == nil && available {
@@ -138,11 +176,13 @@ func FindAvailablePortWithProtocol(preferredPort int, protocol string) (int, err
 		}
 	}
 
-	// 如果到达最大端口仍未找到，从最小端口到随机端口再次尝试
-	for port := MinPort; port < startPort; port++ {
-		available, err := CheckPort(port, protocol)
-		if err == nil && available {
-			return port, nil
+	// 如果到达最大端口仍未找到，从最小端口到起始端口再次尝试
+	if startPort > MinPort {
+		for port := MinPort; port < startPort; port++ {
+			available, err := CheckPort(port, protocol)
+			if err == nil && available {
+				return port, nil
+			}
 		}
 	}
 
