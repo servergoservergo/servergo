@@ -1,0 +1,231 @@
+/* 太空主题样式 */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #e8e8e8;
+    background: #000011;
+    background-image: 
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+        radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+    background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+    background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+    animation: starfield 200s linear infinite;
+    min-height: 100vh;
+}
+
+@keyframes starfield {
+    from { background-position: 0 0, 40px 60px, 130px 270px, 70px 100px; }
+    to { background-position: 550px 550px, 390px 410px, 380px 520px, 220px 250px; }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: rgba(0, 0, 34, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 100, 255, 0.3);
+    border-radius: 20px;
+    box-shadow: 
+        0 0 50px rgba(100, 100, 255, 0.2),
+        inset 0 0 50px rgba(100, 100, 255, 0.05);
+    margin-top: 30px;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, transparent, rgba(100, 100, 255, 0.4), transparent);
+    border-radius: 20px;
+    z-index: -1;
+    animation: borderPulse 6s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+h1 {
+    border: none;
+    padding-bottom: 25px;
+    margin-top: 0;
+    color: #00d4ff;
+    font-size: 32px;
+    font-weight: 300;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 
+        0 0 10px #00d4ff,
+        0 0 20px #00d4ff,
+        0 0 30px #00d4ff;
+    position: relative;
+}
+
+h1::after {
+    content: '🚀';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    animation: rocket 3s ease-in-out infinite;
+}
+
+@keyframes rocket {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50% { transform: translateX(-50%) translateY(-5px); }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    background: rgba(0, 0, 34, 0.6);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+}
+
+th {
+    text-align: left;
+    padding: 20px 16px;
+    background: linear-gradient(135deg, #001133 0%, #002266 100%);
+    color: #00d4ff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #00d4ff;
+    text-shadow: 0 0 10px #00d4ff;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+a {
+    color: #64ffda;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
+}
+
+a:hover {
+    color: #00d4ff;
+    text-shadow: 0 0 15px #00d4ff;
+}
+
+.dir {
+    color: #ff6b6b;
+    font-weight: 700;
+    text-shadow: 0 0 10px #ff6b6b;
+}
+
+.parent {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.parent a {
+    background: linear-gradient(135deg, #00d4ff 0%, #64ffda 100%);
+    color: #000011;
+    padding: 14px 28px;
+    border-radius: 30px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+    text-shadow: none;
+}
+
+.parent a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 212, 255, 0.6);
+    background: linear-gradient(135deg, #64ffda 0%, #00d4ff 100%);
+}
+
+.footer {
+    margin-top: 40px;
+    border-top: 1px solid rgba(0, 212, 255, 0.3);
+    padding-top: 25px;
+    font-size: 14px;
+    color: #64ffda;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name-col { width: 55%; }
+.size-col { width: 15%; }
+.date-col { width: 30%; }
+
+.time {
+    font-style: italic;
+    color: #00d4ff;
+    text-shadow: 0 0 5px #00d4ff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 15px;
+        border-radius: 15px;
+    }
+    
+    th, td {
+        padding: 12px 10px;
+    }
+    
+    .date-col { display: none; }
+    .name-col { width: 70%; }
+    .size-col { width: 30%; }
+    
+    h1 { 
+        font-size: 24px; 
+        letter-spacing: 2px;
+    }
+}
+
+/* GitHub Corner */
+.github-corner svg {
+    fill: #00d4ff;
+    color: #000011;
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%, 100% { transform: rotate(0); }
+    20%, 60% { transform: rotate(-25deg); }
+    40%, 80% { transform: rotate(10deg); }
+} 
