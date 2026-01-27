@@ -7,11 +7,18 @@
 *.dll
 *.so
 *.dylib
+*.obj
+*.o
+*.a
+*.lib
+*.pdb
+*.dll
 
 # 测试二进制文件
 *.test
 *.out
 *.prof
+coverage.out
 
 # Go相关
 .idea/
@@ -34,6 +41,8 @@ go.work
 .env
 .env.local
 .envrc
+local.config
+config.local
 
 # 操作系统文件
 .DS_Store
@@ -65,4 +74,56 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+
+# Go build cache
+/go-build/
+
+# Go coverage
+.coverprofile
+
+# IDE specific files
+.vs/
+*.swp
+*.swo
+*~
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux specific files
+*~
+*.tmp
+*.temp
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# IDE temp files
+*.tmp
+*.temp
+
+# Local environment settings
+.env.local
+.env.production
+.env.development
+
+# Debug files
+*.stackdump
 
